@@ -23,6 +23,7 @@ interface ProductFilters {
   sort_type: string;
   per_page: number;
   vendor_id?: string | number;
+  has_discount?: boolean;
 }
 
 const SORT_OPTIONS = [
@@ -83,6 +84,7 @@ export function ProductCatalog({
     sort_by: 'created_at',
     sort_type: 'desc',
     per_page: 12,
+    has_discount: false,
   };
 
   const [filters, setFilters] = useState<ProductFilters>({
@@ -420,7 +422,7 @@ export function ProductCatalog({
     });
   };
 
-  const hasActiveFilters = filters.search || filters.category_id || (filters.brand_id && !initialFilters.brand_id) || filters.department_id || filters.min_price || filters.max_price;
+  const hasActiveFilters = filters.search || filters.category_id || (filters.brand_id && !initialFilters.brand_id) || filters.department_id || filters.min_price || filters.max_price || (filters.has_discount && !initialFilters.has_discount);
 
   // These are now handled in local state: productsList and totalProducts
 
@@ -678,18 +680,26 @@ export function ProductCatalog({
 
       {/* Main Area */}
       <div className="flex-1 min-w-0">
-        <div className="mb-8">
+        <div className="mb-8 sm:mb-12 relative">
           {title && (
-            <h1 className="text-3xl sm:text-4xl font-black mb-2" style={{ color: tokens.colors[mode].text.primary }}>
-               {title}
-            </h1>
+            <div className="flex items-center gap-4 mb-3">
+              <div className="w-2 h-10 rounded-full bg-primary" />
+              <h1 className="text-3xl sm:text-5xl font-black tracking-tight" style={{ color: tokens.colors[mode].text.primary }}>
+                {title}
+              </h1>
+            </div>
           )}
           {description && (
-            <p className="text-base font-bold opacity-70" style={{ color: tokens.colors[mode].text.secondary }}>{description}</p>
+            <p className="text-lg font-bold opacity-60 max-w-2xl mb-4" style={{ color: tokens.colors[mode].text.secondary }}>
+              {description}
+            </p>
           )}
-          <p className="text-sm font-bold opacity-60 mt-1" style={{ color: tokens.colors[mode].text.secondary }}>
-            {totalProducts} {t('common:products')} {t('common:available')}
-          </p>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+            <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+            <p className="text-sm font-black uppercase tracking-widest opacity-80" style={{ color: tokens.colors[mode].text.primary }}>
+              {totalProducts} {t('common:products')} {t('common:available')}
+            </p>
+          </div>
         </div>
 
         {/* Top Bar */}

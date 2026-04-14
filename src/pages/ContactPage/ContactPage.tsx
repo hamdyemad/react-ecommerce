@@ -46,6 +46,16 @@ export function ContactPage() {
     }
   };
 
+  // Helper to extract coordinates from Google Maps URL
+  const getCoordsFromUrl = (url: string) => {
+    if (!url) return null;
+    const match = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+    if (match) return `${match[1]},${match[2]}`;
+    return null;
+  };
+
+  const preciseLocation = getCoordsFromUrl(settings?.google_maps_url || '') || settings?.address || 'Cairo, Egypt';
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
@@ -57,22 +67,22 @@ export function ContactPage() {
     {
       icon: '📍',
       title: t('visitUs'),
-      details: [settings?.address || '123 Business Street', 'New York, NY 10001', 'United States']
+      details: [settings?.address || t('common:ourLocation')]
     },
     {
       icon: '📞',
       title: t('callUs'),
-      details: [settings?.phone_1 || '+1 (555) 123-4567', settings?.phone_2 || '', 'Mon-Fri: 9AM - 6PM']
+      details: [settings?.phone_1 || '', settings?.phone_2 || '']
     },
     {
       icon: '📧',
       title: t('emailUs'),
-      details: [settings?.email || 'support@example.com']
+      details: [settings?.email || '']
     },
     {
       icon: '💬',
       title: t('liveSupport'),
-      details: ['Available 24/7', 'Average response: 2 min', 'Click to start chat']
+      details: [t('common:support247')]
     }
   ];
 
@@ -276,38 +286,21 @@ export function ContactPage() {
         <div className="space-y-8">
           {/* Map Placeholder */}
           <div
-            className="rounded-[40px] overflow-hidden shadow-2xl relative group"
+            className="rounded-[40px] overflow-hidden shadow-2xl relative group h-[450px]"
             style={{
               background: tokens.colors[mode].surface.elevated,
-              border: `1px solid ${tokens.colors[mode].border.DEFAULT}`,
-              height: '450px'
+              border: `1px solid ${tokens.colors[mode].border.DEFAULT}`
             }}
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
-            <div 
-              className="w-full h-full flex items-center justify-center p-8 text-center"
-              style={{
-                background: mode === 'light'
-                  ? `linear-gradient(135deg, ${tokens.colors.light.background.subtle} 0%, ${tokens.colors.light.border.DEFAULT} 100%)`
-                  : `linear-gradient(135deg, ${tokens.colors.dark.surface.elevated} 0%, ${tokens.colors.dark.surface.base} 100%)`
-              }}
-            >
-              <div className="text-center transform transition-transform duration-500 group-hover:scale-110">
-                <div className="text-8xl mb-6">🗺️</div>
-                <p 
-                  className="text-3xl font-black mb-4"
-                  style={{ color: tokens.colors[mode].text.primary }}
-                >
-                  {t('mapLocation')}
-                </p>
-                <p 
-                  className="text-lg font-bold max-w-md mx-auto"
-                  style={{ color: tokens.colors[mode].text.secondary }}
-                >
-                  {settings?.address || '123 Business Street, New York, NY 10001'}
-                </p>
-              </div>
-            </div>
+            <iframe
+              src={`https://maps.google.com/maps?q=${encodeURIComponent(preciseLocation)}&t=&z=16&ie=UTF8&iwloc=&output=embed`}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              title="Store Location"
+            ></iframe>
           </div>
 
           {/* Business Hours */}

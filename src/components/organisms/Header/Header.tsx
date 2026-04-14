@@ -180,9 +180,9 @@ export function Header({
               <Link to="/track-order" className="hover:text-primary transition-colors flex items-center gap-2">
                 <span>🚚</span> {t('common:trackOrder', 'Track Order')}
               </Link>
-              <a href="#" className="hover:text-primary transition-colors flex items-center gap-2">
+              <Link to="/store-locator" className="hover:text-primary transition-colors flex items-center gap-2">
                 <span>📍</span> {t('common:storeLocator')}
-              </a>
+              </Link>
             </div>
             <div className="flex items-center gap-4">
               <button

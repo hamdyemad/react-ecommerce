@@ -26,7 +26,7 @@ function HeroShimmer({ mode }: { mode: 'light' | 'dark' }) {
     <div 
       className="relative w-full overflow-hidden"
       style={{ 
-        height: '100vh', 
+        height: 'calc(100vh - var(--header-height, 140px))', 
         minHeight: '500px',
         background: mode === 'light' 
           ? 'linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%)' 
@@ -60,7 +60,8 @@ function HeroShimmer({ mode }: { mode: 'light' | 'dark' }) {
 }
 
 interface HeroSlide {
-  image: string;
+  media_type: 'image' | 'video';
+  media_url: string;
   title: string;
   subtitle: string;
   link?: string;
@@ -70,7 +71,7 @@ function HeroSlideItem({ slide, t }: { slide: HeroSlide; t: (key: string, fallba
   return (
     <div
       className="relative w-full select-none group overflow-hidden"
-      style={{ height: '100vh', minHeight: '500px', userSelect: 'none' }}
+      style={{ height: 'calc(100vh - var(--header-height, 140px))', minHeight: '500px', userSelect: 'none' }}
     >
       <style>{`
         @keyframes heroRevealUp {
@@ -93,15 +94,26 @@ function HeroSlideItem({ slide, t }: { slide: HeroSlide; t: (key: string, fallba
         }
       `}</style>
 
-      {/* Background Image with Zoom Effect */}
+      {/* Background Media with Zoom Effect */}
       <div className="absolute inset-0 w-full h-full transform transition-transform duration-[12s] ease-out scale-100 group-hover:scale-110">
-        <img
-          src={slide.image}
-          alt={slide.title}
-          className="w-full h-full pointer-events-none"
-          style={{ objectFit: 'cover', objectPosition: 'center' }}
-          draggable={false}
-        />
+        {slide.media_type === 'video' ? (
+          <video
+            src={slide.media_url}
+            className="w-full h-full object-cover pointer-events-none"
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        ) : (
+          <img
+            src={slide.media_url}
+            alt={slide.title}
+            className="w-full h-full pointer-events-none"
+            style={{ objectFit: 'cover', objectPosition: 'center' }}
+            draggable={false}
+          />
+        )}
       </div>
 
       {/* Luxurious Overlay Gradient */}
@@ -154,9 +166,11 @@ function HeroSlideItem({ slide, t }: { slide: HeroSlide; t: (key: string, fallba
           </h1>
         </div>
 
-        <div className="opacity-0 animate-hero-fade" style={{ animationDelay: '0.9s' }}>
-          <HeroShopButton t={t} link={slide.link} />
-        </div>
+        {slide.link && slide.link.trim() !== '' && (
+          <div className="opacity-0 animate-hero-fade" style={{ animationDelay: '0.9s' }}>
+            <HeroShopButton t={t} link={slide.link} />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -419,8 +433,9 @@ export function HomePage({ onAddToCart, onToggleWishlist, wishlistItems = [] }: 
   };
 
   // Map API sliders to heroSlides format
-  const heroSlides = sliders.map(slider => ({
-    image: slider.image,
+  const heroSlides: HeroSlide[] = sliders.map(slider => ({
+    media_type: slider.media_type,
+    media_url: slider.media_url,
     title: slider.title || '',
     subtitle: slider.description || '',
     link: slider.slider_link
@@ -444,9 +459,13 @@ export function HomePage({ onAddToCart, onToggleWishlist, wishlistItems = [] }: 
         .hero-carousel-wrapper .overflow-hidden {
           border-radius: 0 !important;
         }
-        .hero-carousel-wrapper .flex-shrink-0 {
-          height: 100vh;
+          height: calc(100vh - var(--header-height, 140px));
           min-height: 500px;
+        }
+        @media (max-width: 640px) {
+          .hero-carousel-wrapper .flex-shrink-0 {
+            height: calc(100vh - var(--header-height, 80px));
+          }
         }
       `}</style>
       <section className="hero-carousel-wrapper" style={{ marginTop: 0 }}>

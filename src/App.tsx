@@ -48,6 +48,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { PointsPage } from './pages/PointsPage';
 import { AllProductsPage } from './pages/AllProductsPage';
 import { NewArrivalsPage } from './pages/NewArrivalsPage';
+import { StoreLocatorPage } from './pages/StoreLocatorPage';
 import { TrackOrderPage } from './pages/TrackOrderPage/TrackOrderPage';
 import { SocialCallbackPage } from './pages/SocialCallbackPage';
 import { Toaster } from 'react-hot-toast';
@@ -386,6 +387,27 @@ function DemoContent() {
   };
 
   // Financial Calculation
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      const header = document.querySelector('header');
+      if (header) {
+        document.documentElement.style.setProperty('--header-height', `${header.offsetHeight}px`);
+      }
+    };
+    
+    // Initial measure
+    updateHeaderHeight();
+    
+    // Remeasure on resize or scroll (since header changes size on scroll)
+    window.addEventListener('resize', updateHeaderHeight);
+    window.addEventListener('scroll', updateHeaderHeight);
+    
+    return () => {
+      window.removeEventListener('resize', updateHeaderHeight);
+      window.removeEventListener('scroll', updateHeaderHeight);
+    };
+  }, []);
+
   const subtotal = isAuthenticated 
     ? serverTotals.subtotal 
     : cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -452,6 +474,7 @@ function DemoContent() {
           <Route path="/categories/:categoryId" element={<CategoryPage onAddToCart={handleAddToCart} onToggleWishlist={handleToggleWishlist} wishlistItems={wishlist.map((i: any) => i.id)} />} />
           <Route path="/sub-category/:subcategorySlug" element={<SubcategoryPage onAddToCart={handleAddToCart} onToggleWishlist={handleToggleWishlist} wishlistItems={wishlist.map((i: any) => i.id)} />} />
           <Route path="/brands" element={<BrandsPage />} />
+          <Route path="/store-locator" element={<StoreLocatorPage />} />
           <Route path="/brand/:brandId" element={<BrandPage onAddToCart={handleAddToCart} onToggleWishlist={handleToggleWishlist} wishlistItems={wishlist.map((i: any) => i.id)} />} />
           <Route path="/vendors/:slug" element={<VendorPage onAddToCart={handleAddToCart} onToggleWishlist={handleToggleWishlist} wishlistItems={wishlist.map((i: any) => i.id)} />} />
           <Route path="/product/:slug" element={<ProductDetailsPage onAddToCart={handleAddToCart} onToggleWishlist={handleToggleWishlist} wishlistItems={wishlist.map((i: any) => i.id)} isLoading={isCartActionLoading} />} />
