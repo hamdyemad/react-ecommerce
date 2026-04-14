@@ -1,17 +1,14 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDirection } from '../hooks/useDirection';
-import { useCatalog } from '../hooks/useCatalog';
+
 import { tokens } from '../tokens';
 import { useTheme } from '../hooks/useTheme';
 import { useSettings } from '../hooks/useSettings';
 
 export function StoreLocatorPage() {
   const { t } = useTranslation();
-  const { country, language } = useDirection();
-  const { settings, loading: settingsLoading } = useSettings();
-  const { countries } = useCatalog();
+  const { settings } = useSettings();
   const { mode } = useTheme();
   const [animationStep, setAnimationStep] = useState(0); // 0: Galaxy, 1: Planet Down, 2: Zoom, 3: Map
 
@@ -29,7 +26,7 @@ export function StoreLocatorPage() {
     mapUrl: ''
   };
 
-  const activeCountryName = settings?.address || (countries.find(c => c.code === country)?.name) || 'Egypt';
+
 
   // Helper to extract coordinates from Google Maps URL
   const getCoordsFromUrl = (url: string) => {
@@ -81,7 +78,6 @@ export function StoreLocatorPage() {
                   initial={{ 
                     x: Math.random() * window.innerWidth, 
                     y: Math.random() * window.innerHeight,
-                    size: Math.random() * 2 + 1,
                     opacity: Math.random()
                   }}
                   animate={{ opacity: [0.2, 1, 0.2] }}
@@ -199,7 +195,7 @@ export function StoreLocatorPage() {
           </div>
 
           <button 
-            onClick={() => window.open(storeInfo.mapUrl, '_blank')}
+            onClick={() => window.open(storeInfo.mapUrl || undefined, '_blank')}
             className="w-full py-3 rounded-xl bg-primary text-white font-black text-xs uppercase tracking-widest hover:scale-[1.02] transition-all"
           >
              {t('common:viewDetails')}

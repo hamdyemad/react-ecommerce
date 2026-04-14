@@ -1,9 +1,10 @@
 import React, { useState, Suspense, useRef, useMemo } from 'react';
-import { Canvas, useFrame, useLoader } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment, useTexture, Float, useGLTF, Center, Html } from '@react-three/drei';
+import { Canvas, useLoader } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera, Environment, useTexture, useGLTF, Center, Html } from '@react-three/drei';
 import { motion, AnimatePresence } from 'motion/react';
 import { Shirt, User, X, Maximize2, Minimize2, Loader2 } from 'lucide-react';
 import * as THREE from 'three';
+// @ts-ignore
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 
 // Simple Error Boundary to catch 3D loading errors (CORS, 404s, etc)
@@ -30,11 +31,7 @@ const prepareUrl = (url: string) => {
   return url;
 };
 
-interface TryOnItem {
-  id: string | number;
-  image: string;
-  type: 'top' | 'bottom' | 'full';
-}
+
 
 function ObjModel({ url, type }: { url: string, type: 'top' | 'bottom' }) {
   const [localUrl, setLocalUrl] = useState<string | null>(null);
@@ -137,7 +134,7 @@ function ObjLoaderInternal({ url }: { url: string }) {
   });
   const clonedObj = useMemo(() => {
     const clone = obj.clone();
-    clone.traverse((child) => {
+    clone.traverse((child: any) => {
       if (child instanceof THREE.Mesh) {
         if (!child.material || (Array.isArray(child.material) && child.material.length === 0) || (child.material as any).color?.getHex() === 0xffffff) {
            child.material = new THREE.MeshStandardMaterial({ 

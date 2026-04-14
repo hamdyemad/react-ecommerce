@@ -1,7 +1,5 @@
-import { Badge } from '../components/atoms/Badge';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../hooks/useTheme';
-import { tokens } from '../tokens';
 import { ProductCatalog } from '../components/organisms/ProductCatalog/ProductCatalog';
 
 interface DealsPageProps {

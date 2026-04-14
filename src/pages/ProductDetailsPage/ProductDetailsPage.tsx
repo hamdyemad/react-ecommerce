@@ -14,7 +14,8 @@ import type { ProductDetail } from '../../types/product';
 import type { Review } from '../../types/review';
 import { tokens } from '../../tokens';
 import { Canvas, useLoader } from '@react-three/fiber';
-import { OrbitControls, useGLTF, Center, Environment, Stage, ContactShadows, Html } from '@react-three/drei';
+import { OrbitControls, useGLTF, Stage, Html } from '@react-three/drei';
+// @ts-ignore
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import { Loader2 } from 'lucide-react';
 
@@ -291,7 +292,7 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
     
     // Add variant images
     if (currentVariant?.images) {
-      currentVariant.images.forEach(img => mediaSet.add(img));
+      currentVariant.images.forEach((img: string) => mediaSet.add(img));
     }
     
     // Add product images
@@ -478,7 +479,7 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
                               </div>
                             </Html>
                           }>
-                            <Stage environment="city" intensity={0.6} contactShadow={{ opacity: 0.5, blur: 2 }} adjustCamera={true}>
+                            <Stage environment="city" intensity={0.6} adjustCamera={true}>
                                <Product3DViewer url={img} />
                             </Stage>
                           </Suspense>
