@@ -15,10 +15,9 @@ const THEME_STORAGE_KEY = 'ecommerce-ds-theme';
 
 interface ThemeProviderProps {
   children: React.ReactNode;
-  defaultMode?: ThemeMode;
 }
 
-export function ThemeProvider({ children, defaultMode = 'light' }: ThemeProviderProps) {
+export function ThemeProvider({ children }: ThemeProviderProps) {
   const [mode, setModeState] = useState<ThemeMode>('light'); // Always start with light mode
 
   // Load from localStorage after mount

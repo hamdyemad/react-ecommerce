@@ -80,7 +80,7 @@ export function getDirectionalPreset(
   presetName: keyof typeof animationPresets,
   direction: Direction
 ) {
-  const preset = animationPresets[presetName];
+  const preset = animationPresets[presetName] as any;
   
   return {
     initial: mirrorAnimation(preset.initial, direction),

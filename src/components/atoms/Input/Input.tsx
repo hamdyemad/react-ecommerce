@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '@/utils/cn';
 import { useDirection } from '@/hooks/useDirection';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { cva } from 'class-variance-authority';
 
 const inputVariants = cva(
   'w-full rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50',

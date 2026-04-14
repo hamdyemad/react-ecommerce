@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { tokens } from '../../../tokens';
 import { useTheme } from '../../../hooks/useTheme';
@@ -13,9 +12,8 @@ interface SuccessModalProps {
 
 export function SuccessModal({ orderData, onClose }: SuccessModalProps) {
   const { mode } = useTheme();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { selectedCountry } = useDirection();
-  const isRTL = i18n.language === 'ar';
   const navigate = useNavigate();
   
   const currency = selectedCountry?.currency?.code || 'EGP';

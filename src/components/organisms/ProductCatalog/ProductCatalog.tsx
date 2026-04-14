@@ -22,6 +22,7 @@ interface ProductFilters {
   sort_by: string;
   sort_type: string;
   per_page: number;
+  vendor_id?: string | number;
 }
 
 const SORT_OPTIONS = [

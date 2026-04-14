@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDirection } from '../../../hooks/useDirection';
 import logoEn from '../../../assets/logos/logo_en.png';
@@ -9,7 +8,7 @@ interface InvoiceProps {
 }
 
 export function Invoice({ order }: InvoiceProps) {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const { selectedCountry } = useDirection();
   const isRTL = i18n.language === 'ar';
   const currency = selectedCountry?.currency?.code || 'EGP';

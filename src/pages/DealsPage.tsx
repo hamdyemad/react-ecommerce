@@ -8,11 +8,10 @@ import { tokens } from '../tokens';
 interface DealsPageProps {
   onAddToCart: (id: string | number) => void;
   onToggleWishlist?: (id: string | number) => void;
-  onQuickView?: (id: string | number) => void;
   wishlistItems?: (string | number)[];
 }
 
-export function DealsPage({ onAddToCart, onToggleWishlist, onQuickView, wishlistItems = [] }: DealsPageProps) {
+export function DealsPage({ onAddToCart, onToggleWishlist, wishlistItems = [] }: DealsPageProps) {
   const { t } = useTranslation();
   const { mode } = useTheme();
   const saleProducts = products.filter(p => p.originalPrice);
@@ -61,7 +60,6 @@ export function DealsPage({ onAddToCart, onToggleWishlist, onQuickView, wishlist
           products={saleProducts}
           badge={{ text: t('saveBig') || 'Save Big', variant: 'error' }}
           onAddToCart={onAddToCart}
-          onQuickView={onQuickView}
           onToggleWishlist={onToggleWishlist}
           wishlistItems={wishlistItems}
         />

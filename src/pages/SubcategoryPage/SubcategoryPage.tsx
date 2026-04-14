@@ -287,6 +287,7 @@ export function SubcategoryPage({ onAddToCart, onToggleWishlist, wishlistItems }
                   <ProductCard
                     key={product.id}
                     id={product.id}
+                    slug={String(product.id)}
                     image={product.image}
                     name={product.title}
                     real_price={product.price}

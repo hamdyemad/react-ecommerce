@@ -1,3 +1,5 @@
+import type { VendorProduct } from './product';
+
 export interface Customer {
   id: number;
   full_name: string;
@@ -12,36 +14,7 @@ export interface Customer {
   updated_at: string;
 }
 
-export interface VendorProduct {
-  id: number;
-  vendor_id: number;
-  product_id: number;
-  slug: string;
-  points: number;
-  sku: string;
-  reviews_count: number;
-  review_avg_star: number;
-  limitation: number;
-  status: string;
-  number_of_sale: number;
-  views: number;
-  sort_number: number;
-  stock: number;
-  is_fav: boolean;
-  configuration_type: string;
-  taxes: Array<{
-    id: number;
-    name: string;
-    percentage: number;
-    tax_rate: number;
-    is_active: boolean;
-    created_at: string;
-    updated_at: string;
-  }>;
-  configuration_tree: any[];
-  created_at: string;
-  updated_at: string;
-}
+
 
 export interface Review {
   id: number;

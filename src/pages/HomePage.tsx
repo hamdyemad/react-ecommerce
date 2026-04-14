@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { contactService } from '../services';
-import { productService, sliderService } from '../services';
+import { productService, sliderService, categoryService } from '../services';
 import { useTheme } from '../hooks/useTheme';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useDirection } from '../hooks/useDirection';
+
 import { useCatalog } from '../hooks/useCatalog';
 import { Button } from '../components/atoms/Button';
 import { tokens } from '../tokens';
@@ -263,7 +263,6 @@ function HeroShopButton({ t, link }: { t: (key: string, fallback?: string) => st
 export function HomePage({ onAddToCart, onToggleWishlist, wishlistItems = [] }: HomePageProps) {
   const { mode } = useTheme();
   const { t } = useTranslation();
-  const { direction } = useDirection();
   const { categories: catalogCategories, loadingCategories } = useCatalog();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterLoading, setNewsletterLoading] = useState(false);

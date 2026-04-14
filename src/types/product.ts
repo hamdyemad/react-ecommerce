@@ -1,4 +1,3 @@
-import type { Brand } from './brand';
 import type { Vendor } from './vendor';
 
 /**

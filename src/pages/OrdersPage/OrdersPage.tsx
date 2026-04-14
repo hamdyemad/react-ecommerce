@@ -13,8 +13,6 @@ export function OrdersPage() {
   const { mode } = useTheme();
   const { t } = useTranslation();
   const [orders, setOrders] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [loadingOrder, setLoadingOrder] = useState(false);
 
@@ -40,7 +38,6 @@ export function OrdersPage() {
     // Simulating initial load
     setTimeout(() => {
         setOrders(mockOrders);
-        setLoading(false);
     }, 500);
   }, []);
 

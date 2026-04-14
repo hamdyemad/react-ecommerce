@@ -1,6 +1,6 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { useTheme } from '../../hooks/useTheme';
-import { useDirection } from '../../hooks/useDirection';
+
 import { CartItem } from '../../components/molecules/CartItem';
 import { EmptyCartState } from '../../components/molecules/EmptyCartState';
 import { useTranslation } from 'react-i18next';

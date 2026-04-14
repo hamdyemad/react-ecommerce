@@ -90,7 +90,6 @@ function DemoContent() {
   
   const [cartItems, setCartItems] = useState<CartItemType[]>([]);
   const [serverTotals, setServerTotals] = useState({ subtotal: 0, total: 0 });
-  const [loadingCart, setLoadingCart] = useState(false);
   const [isCartActionLoading, setIsCartActionLoading] = useState(false);
   
   const [appliedPromo, setAppliedPromo] = useState<any>(() => {
@@ -104,7 +103,6 @@ function DemoContent() {
   useEffect(() => {
     const fetchCart = async () => {
       if (isAuthenticated) {
-        setLoadingCart(true);
         try {
           const res = await cartService.getCart();
           if (res.status && res.data) {
@@ -162,8 +160,6 @@ function DemoContent() {
           }
         } catch (err) {
           console.error('Failed to fetch server cart:', err);
-        } finally {
-          setLoadingCart(false);
         }
       } else {
         // Guest Mode

@@ -14,7 +14,7 @@ export function BlogDetailPage() {
   const { mode } = useTheme();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);

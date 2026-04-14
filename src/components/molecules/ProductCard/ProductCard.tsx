@@ -6,6 +6,7 @@ import { useDirection } from '../../../hooks/useDirection';
 import { useCatalog } from '../../../hooks/useCatalog';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n';
+import { tokens } from '../../../tokens';
 
 
 export interface ProductCardProps {
@@ -51,9 +52,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   className,
   discount: propDiscount,
   points,
-  showAddToCart = true, // Default to true for backward compatibility
-  vendor,
   brand,
+  showAddToCart = true, // Default to true for backward compatibility
   department,
   category,
   sub_category,
@@ -65,9 +65,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const { countries } = useCatalog();
   const isRTL = i18n.language === 'ar';
   
-  // Fallback to 'stock' if 'remaining_stock' is not provided (or 0) but stock exists
-  // We use type assertion to check for any legacy or undocumented fields
-  const remaining_stock = propRemainingStock > 0 ? propRemainingStock : ((arguments[0] as any).stock || 0);
+  const remaining_stock = propRemainingStock;
 
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(isInWishlist);
@@ -410,19 +408,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               </span>
             )
           )}
-          {fake_price && (
-            <span className="text-sm font-semibold line-through flex items-center gap-1 opacity-70" style={{ color: mode === 'light' ? '#94a3b8' : '#64748b' }}>
-              {originalPrice?.toFixed(2)}
-              {currency && (
-                currency.use_image && currency.image ? (
-                  <img src={currency.image} alt={currency.code} className="w-3.5 h-3.5 object-contain inline-block opacity-60" />
-                ) : (
-                  <span className="text-xs">{currency.code}</span>
-                )
-              )}
-            </span>
-          )}
         </div>
+        
+        {showAddToCart && onAddToCart && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              onAddToCart(id);
+            }}
+            className="w-full mt-4 py-3 rounded-xl font-black text-sm transition-all duration-300 transform active:scale-95 shadow-xl hover:shadow-primary/20"
+            style={{
+              background: tokens.gradients.primary,
+              color: '#ffffff',
+            }}
+          >
+            🛒 {t('common:addToCart', 'Add to Cart')}
+          </button>
+        )}
       </div>
     </div>
   );

@@ -38,7 +38,7 @@ export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedP
   const [cities, setCities] = useState<City[]>([]);
   const [loadingCities, setLoadingCities] = useState(false);
   const [shippingCost, setShippingCost] = useState(0);
-  const [calculatingShipping, setCalculatingShipping] = useState(false);
+  const [calculatingShipping] = useState(false);
   const [userAddresses, setUserAddresses] = useState<Address[]>([]);
 
   const [formData, setFormData] = useState({
