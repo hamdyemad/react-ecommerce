@@ -60,14 +60,14 @@ export function ProductCarouselSection({
 
   // Split items based on screen size
   const getItemsPerSlide = () => {
-    if (screenSize === 'mobile') return type === 'categories' ? 2 : 1;
-    if (screenSize === 'tablet') return type === 'categories' ? 2 : 2;
+    if (screenSize === 'mobile') return 1;
+    if (screenSize === 'tablet') return 2;
     return 4;
   };
   const itemsPerSlide = getItemsPerSlide();
   
   const gridColsClass = type === 'categories' 
-    ? 'grid-cols-2 lg:grid-cols-4'
+    ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'
     : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4';
   const slides = [];
   for (let i = 0; i < items.length; i += itemsPerSlide) {
@@ -160,22 +160,33 @@ export function ProductCarouselSection({
                         className="group block"
                       >
                         <div
-                          className="rounded-[24px] sm:rounded-[40px] p-4 sm:p-8 h-full transition-all duration-500 hover:scale-105 hover:shadow-xl border flex flex-col items-center text-center gap-3 sm:gap-6"
+                          className="rounded-[32px] sm:rounded-[40px] p-6 sm:p-8 h-full transition-all duration-500 hover:scale-105 hover:shadow-2xl border flex flex-col items-center text-center gap-4 sm:gap-6 group-hover:border-primary/30"
                           style={{
-                            background: mode === 'light' ? tokens.colors.light.surface.base : tokens.colors.dark.surface.base,
+                            background: mode === 'light' 
+                              ? 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' 
+                              : 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
                             borderColor: mode === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)',
+                            boxShadow: mode === 'light' 
+                              ? '0 10px 30px -5px rgba(0, 0, 0, 0.05)' 
+                              : '0 20px 40px -10px rgba(0, 0, 0, 0.4)',
                           }}
                         >
-                          <div className="w-14 h-14 sm:w-24 sm:h-24 rounded-[16px] sm:rounded-[30px] bg-primary/5 flex items-center justify-center p-3 sm:p-6 group-hover:bg-primary/10 transition-all duration-300 group-hover:-rotate-6">
+                          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-[24px] sm:rounded-[30px] flex items-center justify-center p-4 sm:p-6 group-hover:bg-primary/10 transition-all duration-500 group-hover:-rotate-12 group-hover:scale-110 relative"
+                            style={{
+                              background: mode === 'light' ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.02)',
+                              boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.02)'
+                            }}
+                          >
+                            <div className="absolute inset-0 bg-primary/5 rounded-[24px] sm:rounded-[30px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                             {category.icon ? (
-                              <img src={category.icon} alt={category.name} className="w-full h-full object-contain" />
+                              <img src={category.icon} alt={category.name} className="w-full h-full object-contain relative z-10" />
                             ) : (
-                              <span className="text-2xl sm:text-5xl">🗂️</span>
+                              <span className="text-4xl sm:text-5xl relative z-10">🗂️</span>
                             )}
                           </div>
-                          <div>
-                            <h4 className="font-black text-xs sm:text-lg mb-1 sm:mb-2 truncate w-full max-w-[120px] sm:max-w-[180px]" style={{ color: tokens.colors[mode].text.primary }}>{category.name}</h4>
-                            <span className="inline-block px-2 sm:px-4 py-1 sm:py-1.5 rounded-full bg-primary/10 text-primary text-[9px] sm:text-[10px] font-black uppercase tracking-wider">
+                          <div className="flex flex-col items-center">
+                            <h4 className="font-black text-lg sm:text-xl mb-2 truncate w-full max-w-[200px]" style={{ color: tokens.colors[mode].text.primary }}>{category.name}</h4>
+                            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-[10px] sm:text-[12px] font-black uppercase tracking-widest transition-colors duration-300 group-hover:bg-primary group-hover:text-white">
                               {category.products_count || 0} {t('common:products')}
                             </span>
                           </div>
