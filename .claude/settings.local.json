@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npx tsc:*)",
+      "Bash(sed -i '232s/text-5xl/text-6xl/' \"src/pages/HomePage.tsx\")",
+      "Bash(sed -i '232s/sm:text-7xl/sm:text-8xl/' \"src/pages/HomePage.tsx\")",
+      "Bash(sed -i '232s/lg:text-9xl/lg:text-[12rem]/' \"src/pages/HomePage.tsx\")",
+      "Bash(sed -i '232s/leading\\\\[1.1\\\\]/leading-[1.05]/' \"src/pages/HomePage.tsx\")",
+      "Bash(sed -i '233s/letterSpacing: ''''-0.02em''''/letterSpacing: ''''-0.03em''''/' \"src/pages/HomePage.tsx\")",
+      "Bash(sed -i '256s/text-xl/text-2xl/' \"src/pages/HomePage.tsx\")",
+      "Bash(sed -i '256s/lg:text-3xl/lg:text-4xl/' \"src/pages/HomePage.tsx\")",
+      "mcp__ide__executeCode",
+      "Bash(sed -i '342s/px-8 sm:px-12/px-10 sm:px-16/' \"src/pages/HomePage.tsx\")",
+      "Bash(sed -i '342s/py-5 sm:py-6/py-6 sm:py-8/' \"src/pages/HomePage.tsx\")",
+      "Bash(sed -i '342s/text-lg sm:text-xl/text-xl sm:text-2xl/' \"src/pages/HomePage.tsx\")",
+      "Bash(sed -i '342s/hover:scale-105/hover:scale-110/' \"src/pages/HomePage.tsx\")",
+      "Bash(sed -i '361s/px-8 sm:px-12/px-10 sm:px-16/' \"src/pages/HomePage.tsx\")",
+      "Bash(sed -i '361s/py-5 sm:py-6/py-6 sm:py-8/' \"src/pages/HomePage.tsx\")",
+      "Bash(sed -i '361s/text-lg sm:text-xl/text-xl sm:text-2xl/' \"src/pages/HomePage.tsx\")",
+      "Bash(sed -i '361s/hover:scale-105/hover:scale-110/' \"src/pages/HomePage.tsx\")",
+      "Bash(sed -i '395s/text-2xl sm:text-3xl/text-3xl sm:text-4xl/' \"src/pages/HomePage.tsx\")",
+      "Bash(sed -i '399s/text-4xl sm:text-5xl/text-5xl sm:text-6xl/' \"src/pages/HomePage.tsx\")",
+      "Bash(sed -i '392s/0 10px 40px/0 15px 50px/' \"src/pages/HomePage.tsx\")",
+      "mcp__ide__getDiagnostics"
+    ]
+  }
+}

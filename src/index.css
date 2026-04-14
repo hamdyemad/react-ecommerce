@@ -1,0 +1,511 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary: #6366f1;
+  --color-secondary: #a855f7;
+  --color-accent: #ec4899;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+  --color-border: #e2e8f0;
+  --color-bg-base: #ffffff;
+
+  --breakpoint-xs: 475px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1440px;
+  --breakpoint-3xl: 1920px;
+}
+
+@layer base {
+  html, body {
+    overflow-x: clip;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    @apply antialiased transition-colors duration-200;
+    background-color: #ffffff;
+    color: #0f172a;
+  }
+
+  html[dir="rtl"], html[dir="rtl"] body, html[dir="rtl"] * {
+    font-family: 'Cairo', sans-serif !important;
+  }
+
+  html.dark body {
+    background-color: #020617;
+    color: #f8fafc;
+  }
+  
+  * {
+    border-color: #e2e8f0;
+  }
+
+  html.dark * {
+    border-color: #1e293b;
+  }
+
+  button {
+    cursor: pointer;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border border-white/20 dark:border-slate-800/20 shadow-xl;
+  }
+  
+  .text-gradient {
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    display: inline-block;
+  }
+
+  .animate-gradient {
+    animation: gradient 5s ease infinite;
+  }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes floatParallax {
+  0%, 100% { --float-y: 0px; }
+  50% { --float-y: -20px; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-fadeInUp { animation: fadeInUp 0.6s ease-out forwards; }
+.animate-fadeIn { animation: fadeIn 0.4s ease-out forwards; }
+.animate-scaleIn { animation: scaleIn 0.3s ease-out forwards; }
+.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-shimmer { animation: shimmer 2.8s infinite; }
+.animate-fadeInScale { animation: fadeInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 dark:bg-slate-800 rounded-full hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 dark:bg-slate-800 rounded-full hover:bg-primary/20 transition-all;
+}
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.1) transparent;
+}
+html.dark .custom-scrollbar {
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+/* Stagger Animations */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-in-left {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.scale-in {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.scale-in.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Hide number input spinners */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Print Styles */
+.invoice-print-wrapper {
+  display: none;
+}
+
+@media print {
+  body > *:not(.invoice-print-wrapper) {
+    display: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .invoice-print-wrapper {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .invoice-print-wrapper * {
+    display: initial !important;
+  }
+}
+
+.invoice-print-wrapper {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #1a1a2e;
+    padding: 20px;
+}
+
+.invoice-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.invoice-title-section {
+    text-align: center;
+    padding: 20px 30px 10px;
+}
+
+.invoice-badge {
+    background: linear-gradient(to right, #667eea, #764ba2);
+    padding: 8px 20px;
+    border-radius: 50px;
+    display: inline-block;
+}
+
+.invoice-badge h1 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.invoice-order-info {
+    margin-top: 10px;
+}
+
+.invoice-order-number {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+.invoice-header {
+    padding: 10px 30px 20px;
+    display: flex;
+    justify-content: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.logo-section img {
+    height: 80px;
+    object-fit: contain;
+}
+
+.invoice-content {
+    padding: 25px 30px;
+}
+
+.info-box {
+    background: #f8f9ff;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    margin-bottom: 20px;
+}
+
+.info-box-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+}
+
+.info-section {
+    border-right: 1px dashed rgba(102, 126, 234, 0.2);
+    padding-right: 20px;
+}
+
+[dir="rtl"] .info-section {
+    border-right: none;
+    border-left: 1px dashed rgba(102, 126, 234, 0.2);
+    padding-right: 0;
+    padding-left: 20px;
+}
+
+.info-section:last-child {
+    border: none;
+    padding: 0;
+}
+
+.info-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.info-icon {
+    width: 24px;
+    height: 24px;
+    background: #667eea;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
+.info-icon svg {
+    width: 12px;
+    height: 12px;
+}
+
+.info-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #667eea;
+    text-transform: uppercase;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+}
+
+.info-label {
+    font-size: 10px;
+    color: #666;
+}
+
+.info-value {
+    font-size: 10px;
+    font-weight: 600;
+    text-align: right;
+}
+
+[dir="rtl"] .info-value {
+    text-align: left;
+}
+
+.status-badge {
+    background: #667eea;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 9px;
+}
+
+.products-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.products-table th {
+    background: #f8f9ff;
+    padding: 10px;
+    text-align: left;
+    font-size: 10px;
+    color: #667eea;
+    border-bottom: 2px solid #667eea;
+}
+
+[dir="rtl"] .products-table th {
+    text-align: right;
+}
+
+.products-table td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.product-name {
+    font-weight: 700;
+    font-size: 11px;
+}
+
+.product-sku {
+    font-size: 9px;
+    color: #888;
+}
+
+.summary-section {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+[dir="rtl"] .summary-section {
+    justify-content: flex-start;
+}
+
+.summary-card {
+    width: 250px;
+    background: #f8f9ff;
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+}
+
+.summary-row.total {
+    border-top: 2px solid #667eea;
+    margin-top: 10px;
+    padding-top: 10px;
+    font-weight: 900;
+    font-size: 14px;
+}
+
+.invoice-footer {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+    font-style: italic;
+}

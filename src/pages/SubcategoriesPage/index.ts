@@ -1,0 +1,1 @@
+export { SubcategoriesPage } from './SubcategoriesPage';

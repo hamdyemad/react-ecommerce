@@ -1,0 +1,1 @@
+export { SubcategoryPage } from './SubcategoryPage';
