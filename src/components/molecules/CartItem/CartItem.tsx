@@ -40,7 +40,7 @@ export const CartItem: React.FC<CartItemProps> = ({
   return (
     <div
       className={cn(
-        'flex gap-3 sm:gap-4 bg-surface-base border border-border rounded-xl transition-all shadow-sm hover:shadow-md',
+        'flex gap-3 sm:gap-4 p-3 sm:p-4 bg-surface-base border border-border rounded-xl transition-all shadow-sm hover:shadow-md',
         disabled && 'opacity-50',
         loading && 'animate-pulse',
         className
