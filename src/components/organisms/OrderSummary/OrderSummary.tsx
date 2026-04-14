@@ -70,7 +70,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
 
   return (
     <div 
-      className="rounded-[45px] p-8 md:p-10 sticky top-24 shadow-2xl relative overflow-hidden flex flex-col transition-all duration-300"
+      className="rounded-[24px] sm:rounded-[38px] md:rounded-[45px] p-5 sm:p-7 md:p-10 sticky top-24 shadow-xl md:shadow-2xl relative overflow-hidden flex flex-col transition-all duration-300"
       style={{
         background: tokens.colors[mode].surface.elevated,
         backdropFilter: 'blur(30px)',
@@ -80,7 +80,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
       <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-[80px] -mr-24 -mt-24" />
       
       <h2 
-        className="text-2xl md:text-3xl font-black mb-8 relative z-10 flex items-center gap-4"
+        className="text-xl sm:text-2xl md:text-3xl font-black mb-5 md:mb-8 relative z-10 flex items-center gap-3"
         style={{ color: tokens.colors[mode].text.primary }}
       >
         🧾 {t('orderSummary')}
@@ -88,10 +88,10 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
 
       {/* Items List (Optional - usually for Checkout sidebar) */}
       {showItems && items.length > 0 && (
-        <div className="space-y-4 mb-8 max-h-[250px] overflow-y-auto pr-2 no-scrollbar border-b border-slate-100 dark:border-slate-800 pb-6 relative z-10">
+        <div className="space-y-3 mb-5 md:mb-8 max-h-[250px] overflow-y-auto pr-2 no-scrollbar border-b border-slate-100 dark:border-slate-800 pb-4 md:pb-6 relative z-10">
           {items.map((item) => (
-            <div key={item.id} className="flex gap-4">
-              <img src={item.image} className="w-16 h-16 rounded-xl object-cover bg-slate-100" alt={item.title} />
+            <div key={item.id} className="flex gap-3">
+              <img src={item.image} className="w-14 h-14 rounded-xl object-cover bg-slate-100" alt={item.title} />
               <div className="flex-1 min-w-0">
                 <h4 className="font-bold text-sm line-clamp-1">{item.title}</h4>
                 {item.variant && (
@@ -112,7 +112,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
       )}
 
       {/* Price Breakdown */}
-      <div className="mb-8 relative z-10">
+      <div className="mb-5 md:mb-8 relative z-10">
         <PriceBreakdown
           subtotal={subtotal}
           discount={subtotal - total}
@@ -122,27 +122,10 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
         />
       </div>
 
-      {/* Action Button (Checkout or Place Order) */}
-      <button
-        onClick={onAction}
-        disabled={actionLoading}
-        className="w-full py-5 rounded-2xl font-black text-xl transition-all duration-500 hover:scale-[1.03] active:scale-95 mb-8 shadow-2xl hover:shadow-primary/40 relative z-10 overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
-        style={{
-          background: tokens.gradients.primary,
-          color: '#ffffff',
-        }}
-      >
-        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-        <span className="relative z-10 flex items-center justify-center gap-3">
-          {actionLoading ? '...' : actionLabel}
-        </span>
-      </button>
-
-
-      {/* Promo Code Section */}
-      <div className="relative z-10 mt-2">
+      {/* Promo Code Section — BEFORE the action button */}
+      <div className="relative z-10 mb-4 md:mb-6">
         <label 
-          className="block text-[11px] font-black uppercase tracking-[0.2em] mb-4 px-2"
+          className="block text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] mb-3 px-1"
           style={{ color: tokens.colors[mode].text.tertiary }}
         >
           {t('promoCode')}
@@ -150,10 +133,10 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
         
         {appliedPromo ? (
           <div 
-            className="p-4 rounded-2xl flex items-center justify-between animate-fadeIn"
+            className="p-3 sm:p-4 rounded-2xl flex items-center justify-between animate-fadeIn"
             style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)' }}
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <span className="text-xl">🎉</span>
               <div>
                 <p className="font-black text-xs uppercase tracking-widest text-green-600">{appliedPromo.code}</p>
@@ -166,7 +149,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
             </div>
             <button 
               onClick={handleRemovePromo}
-              className="p-2 hover:bg-black/5 rounded-lg transition-colors"
+              className="p-1.5 sm:p-2 hover:bg-black/5 rounded-lg transition-colors"
               title={t('remove')}
             >
               ✕
@@ -179,7 +162,8 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
               placeholder={t('enterCode')}
               value={promoInput}
               onChange={(e) => setPromoInput(e.target.value)}
-              className="w-full pl-6 pr-32 py-4 rounded-[20px] font-black transition-all focus:ring-8 outline-none shadow-xl"
+              onKeyDown={(e) => e.key === 'Enter' && handleApplyPromo()}
+              className="w-full pl-4 sm:pl-6 pr-24 sm:pr-32 py-3 sm:py-4 rounded-[16px] sm:rounded-[20px] font-black transition-all focus:ring-8 outline-none shadow-md sm:shadow-xl text-sm"
               style={{
                 background: tokens.colors[mode].surface.base,
                 color: tokens.colors[mode].text.primary,
@@ -190,7 +174,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
             <button
               onClick={handleApplyPromo}
               disabled={isApplying || !promoInput.trim()}
-              className="absolute right-2 top-2 bottom-2 px-6 rounded-xl font-black transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-lg group-hover:shadow-primary/20 disabled:opacity-50"
+              className="absolute right-1.5 top-1.5 bottom-1.5 px-4 sm:px-6 rounded-xl font-black transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-md text-sm disabled:opacity-50"
               style={{
                 background: tokens.gradients.primary,
                 color: '#ffffff'
@@ -202,8 +186,24 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
         )}
       </div>
 
+      {/* Action Button (Checkout or Place Order) — AFTER promo code */}
+      <button
+        onClick={onAction}
+        disabled={actionLoading}
+        className="w-full py-4 sm:py-5 rounded-2xl font-black text-lg sm:text-xl transition-all duration-500 hover:scale-[1.03] active:scale-95 shadow-xl hover:shadow-primary/40 relative z-10 overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{
+          background: tokens.gradients.primary,
+          color: '#ffffff',
+        }}
+      >
+        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+        <span className="relative z-10 flex items-center justify-center gap-3">
+          {actionLoading ? '...' : actionLabel}
+        </span>
+      </button>
+
       {isCheckout && (
-        <p className="text-[10px] text-center mt-6 opacity-40 font-bold px-4 leading-relaxed relative z-10">
+        <p className="text-[10px] text-center mt-4 md:mt-6 opacity-40 font-bold px-4 leading-relaxed relative z-10">
           {t('byConfirmingYouAgree', 'By confirming your order, you agree to our Terms and Conditions')}
         </p>
       )}

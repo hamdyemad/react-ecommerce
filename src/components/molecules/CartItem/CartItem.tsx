@@ -40,7 +40,7 @@ export const CartItem: React.FC<CartItemProps> = ({
   return (
     <div
       className={cn(
-        'flex gap-4 p-4 bg-surface-base border border-border rounded-xl transition-all shadow-sm hover:shadow-md',
+        'flex gap-3 sm:gap-4 bg-surface-base border border-border rounded-xl transition-all shadow-sm hover:shadow-md',
         disabled && 'opacity-50',
         loading && 'animate-pulse',
         className
@@ -52,28 +52,28 @@ export const CartItem: React.FC<CartItemProps> = ({
           src={image}
           alt={title}
           className={cn(
-            "w-24 h-24 object-cover rounded-lg bg-secondary-50 shadow-sm transition-opacity duration-300",
+            "w-16 h-16 sm:w-24 sm:h-24 object-cover rounded-lg bg-secondary-50 shadow-sm transition-opacity duration-300",
             loading && "opacity-30"
           )}
           loading="lazy"
         />
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-w-0 space-y-3">
+      <div className="flex-1 min-w-0 py-1 space-y-2 sm:space-y-3">
         {/* Title and Remove Button */}
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start justify-between gap-1">
           <div className="flex-1 min-w-0">
-            <h3 className="text-base font-semibold text-text-primary truncate">
+            <h3 className="text-sm sm:text-base font-semibold text-text-primary truncate">
               {title}
             </h3>
             {variant && (
-              <p className="text-sm text-text-secondary mt-1">{variant}</p>
+              <p className="text-xs sm:text-sm text-text-secondary mt-0.5">{variant}</p>
             )}
           </div>
 
@@ -82,13 +82,13 @@ export const CartItem: React.FC<CartItemProps> = ({
             onClick={() => onRemove(id)}
             disabled={disabled || loading}
             className={cn(
-              'flex-shrink-0 p-2 text-text-tertiary hover:text-error hover:bg-error-50 transition-all rounded-lg',
+              'flex-shrink-0 p-1.5 sm:p-2 text-text-tertiary hover:text-error hover:bg-error-50 transition-all rounded-lg',
               'disabled:cursor-not-allowed disabled:opacity-50'
             )}
             aria-label="Remove item"
           >
             <svg
-              className="w-5 h-5"
+              className="w-4 h-4 sm:w-5 sm:h-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -104,7 +104,7 @@ export const CartItem: React.FC<CartItemProps> = ({
         </div>
 
         {/* Price and Quantity */}
-        <div className="flex items-end justify-between gap-4 flex-wrap">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           <QuantitySelector
             value={quantity}
             onChange={(newQuantity) => onQuantityChange(id, newQuantity)}
@@ -116,7 +116,7 @@ export const CartItem: React.FC<CartItemProps> = ({
           <div className="text-right">
             <Price amount={totalPrice} size="md" />
             {quantity > 1 && (
-              <p className="text-xs text-text-tertiary mt-1 flex items-center justify-end gap-0.5">
+              <p className="text-xs text-text-tertiary mt-0.5 flex items-center justify-end gap-0.5">
                 {price.toFixed(2)}
                 {currency && (
                   currency.use_image && currency.image ? (

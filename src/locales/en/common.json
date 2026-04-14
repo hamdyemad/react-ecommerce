@@ -423,6 +423,8 @@
   "phoneLengthError": "Phone number must be {{length}} digits",
   "selectSavedAddressError": "Please select a shipping address from your account",
   "orderFailed": "Failed to place order",
-  "primary": "Primary",
-  "confirmOrder": "Confirm Order"
+  "confirmOrder": "Confirm Order",
+  "viewFullCart": "View Full Cart",
+  "addToCart": "Add to Cart",
+  "authenticProductFrom": "Authentic Product From"
 }

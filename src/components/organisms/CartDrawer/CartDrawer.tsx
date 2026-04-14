@@ -3,6 +3,7 @@ import { CartItem } from '../../molecules/CartItem';
 import { PriceBreakdown } from '../../molecules/PriceBreakdown';
 import { EmptyCartState } from '../../molecules/EmptyCartState';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface CartItemType {
   id: string;
@@ -34,6 +35,8 @@ export function CartDrawer({
   onCheckout,
   isLoading,
 }: CartDrawerProps) {
+  const { t } = useTranslation();
+
   if (items.length === 0) {
     return (
       <div 
@@ -54,21 +57,21 @@ export function CartDrawer({
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-black text-slate-900">
-                Shopping Cart
+          <div className="p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+                {t('shoppingCart')}
               </h2>
               <button
                 onClick={onClose}
-                className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
                 style={{
                   background: '#f1f5f9',
                   color: '#0f172a'
                 }}
                 aria-label="Close cart"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -91,7 +94,7 @@ export function CartDrawer({
       onClick={onClose}
     >
       <div 
-        className="w-full max-w-md h-full overflow-y-auto"
+        className="w-full max-w-md h-full overflow-y-auto flex flex-col"
         style={{
           background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
           boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.2)',
@@ -99,29 +102,29 @@ export function CartDrawer({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6">
+        <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-black text-slate-900">
-              Shopping Cart ({items.length})
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+              {t('shoppingCart')} ({items.length})
             </h2>
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 flex-shrink-0"
               style={{
                 background: '#f1f5f9',
                 color: '#0f172a'
               }}
               aria-label="Close cart"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
           {/* Cart Items */}
-          <div className="space-y-4 mb-6">
+          <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
             {items.map((item) => (
               <CartItem
                 key={item.id}
@@ -133,24 +136,27 @@ export function CartDrawer({
               />
             ))}
           </div>
+        </div>
 
+        {/* Floating Bottom Section */}
+        <div className="p-4 sm:p-6 bg-white border-t border-slate-100 shadow-[0_-4px_16px_rgba(0,0,0,0.05)]">
           {/* View Full Cart Link */}
           <Link
             to="/cart"
             onClick={onClose}
-            className="block w-full py-3 px-4 rounded-xl font-bold text-center mb-4 transition-all duration-300 hover:scale-105"
+            className="block w-full py-2.5 sm:py-3 px-4 rounded-xl font-bold text-center mb-3 sm:mb-4 transition-all duration-300 hover:scale-[1.02] active:scale-95 text-sm sm:text-base"
             style={{
               background: '#f1f5f9',
               color: '#0f172a',
               border: '2px solid #e2e8f0'
             }}
           >
-            📋 View Full Cart
+            📋 {t('viewFullCart', 'View Full Cart')}
           </Link>
 
           {/* Price Breakdown */}
           <div 
-            className="p-6 rounded-2xl mb-4"
+            className="p-3 sm:p-5 rounded-2xl mb-3 sm:mb-4"
             style={{
               background: 'rgba(248, 250, 252, 0.8)',
               border: '1px solid #e2e8f0'
@@ -166,19 +172,17 @@ export function CartDrawer({
           <Button
             variant="primary"
             size="lg"
-            className="w-full"
+            className="w-full text-sm sm:text-base py-3 sm:py-4 transition-all duration-500 hover:scale-[1.02] active:scale-95"
             onClick={onCheckout}
             style={{
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
               color: '#ffffff',
-              padding: '1rem',
-              fontSize: '1.125rem',
               fontWeight: 'bold',
               borderRadius: '1rem',
               boxShadow: '0 8px 24px rgba(102, 126, 234, 0.4)'
             }}
           >
-            🛒 Proceed to Checkout
+            🛒 {t('proceedToCheckout')}
           </Button>
         </div>
       </div>

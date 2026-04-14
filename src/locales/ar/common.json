@@ -425,6 +425,8 @@
   "phoneLengthError": "رقم الهاتف يجب أن يكون {{length}} أرقام",
   "selectSavedAddressError": "يرجى اختيار عنوان شحن من حسابك",
   "orderFailed": "فشل إتمام الطلب",
-  "primary": "أساسي",
-  "confirmOrder": "تأكيد الطلب"
+  "confirmOrder": "تأكيد الطلب",
+  "viewFullCart": "عرض السلة كاملة",
+  "addToCart": "أضف إلى السلة",
+  "authenticProductFrom": "منتج أصلي من"
 }

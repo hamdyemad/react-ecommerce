@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { useParams, Link } from 'react-router-dom';
@@ -13,6 +13,10 @@ import { reviewService } from '../../services/reviewService';
 import type { ProductDetail } from '../../types/product';
 import type { Review } from '../../types/review';
 import { tokens } from '../../tokens';
+import { Canvas, useLoader } from '@react-three/fiber';
+import { OrbitControls, useGLTF, Center, Environment, Stage, ContactShadows, Html } from '@react-three/drei';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
+import { Loader2 } from 'lucide-react';
 
 interface ProductDetailsPageProps {
   onAddToCart: (data: { 
@@ -229,6 +233,86 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
     }
   }, [currentVariant, mainVendorProduct, quantity]);
 
+  // Media resolution must happen before early returns to satisfy React Hook rules
+  // 1. Helpers
+  const is3DFile = (url: string) => {
+    if (!url) return false;
+    const path = url.split('?')[0].toLowerCase();
+    return path.endsWith('.glb') || path.endsWith('.obj') || path.endsWith('.gltf');
+  };
+
+  const prepare3DUrl = (url: string) => {
+    if (!url) return '';
+    if (url.includes(':8000/storage') && is3DFile(url)) {
+      return url.split(':8000')[1];
+    }
+    return url;
+  };
+
+  const Product3DViewer = ({ url }: { url: string }) => {
+    const normalizedUrl = prepare3DUrl(url);
+    const isGLB = url.split('?')[0].toLowerCase().endsWith('.glb');
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+      fetch(normalizedUrl, { method: 'HEAD' })
+        .then(res => {
+          if (!res.ok) setError(`HTTP ${res.status}`);
+        })
+        .catch(err => setError(err.message));
+    }, [normalizedUrl]);
+
+    if (error) {
+      return (
+        <Html center>
+           <div className="bg-red-500 text-white text-[10px] p-2 rounded shadow-lg whitespace-nowrap">
+             {error}
+           </div>
+        </Html>
+      );
+    }
+    
+    if (isGLB) {
+      const { scene } = useGLTF(normalizedUrl);
+      return <primitive object={scene} />;
+    } else {
+      const obj = useLoader(OBJLoader, normalizedUrl);
+      return <primitive object={obj} />;
+    }
+  };
+
+  // 2. Memos
+  const allMedia = useMemo(() => {
+    const mediaSet = new Set<string>();
+    
+    // Add main product image
+    if (mainVendorProduct?.image) mediaSet.add(mainVendorProduct.image);
+    if (product?.image) mediaSet.add(product.image);
+    
+    // Add variant images
+    if (currentVariant?.images) {
+      currentVariant.images.forEach(img => mediaSet.add(img));
+    }
+    
+    // Add product images
+    if (mainVendorProduct?.images) {
+      mainVendorProduct.images.forEach(img => mediaSet.add(img));
+    } else if (product?.images) {
+      product.images.forEach(img => mediaSet.add(img));
+    }
+
+    const result = Array.from(mediaSet);
+    return result.length > 0 ? result : ['https://via.placeholder.com/600?text=No+Image'];
+  }, [mainVendorProduct, product, currentVariant]);
+
+  const images = useMemo(() => {
+    return allMedia.length > 0 ? allMedia : ['https://via.placeholder.com/600?text=No+Image'];
+  }, [allMedia]);
+
+  const model3d = useMemo(() => {
+    return allMedia.find((m: string) => is3DFile(m));
+  }, [allMedia, is3DFile]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -254,14 +338,6 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
       </div>
     );
   }
-
-  const images = (currentVariant?.images && currentVariant.images.length > 0)
-    ? currentVariant.images
-    : (mainVendorProduct.images && mainVendorProduct.images.length > 0) 
-    ? mainVendorProduct.images 
-    : (product.images && product.images.length > 0)
-    ? product.images
-    : [mainVendorProduct.image || product.image || 'https://via.placeholder.com/600?text=No+Image'];
 
   const tabs = [
     { id: 'details', label: 'Details', icon: '📋' },
@@ -392,14 +468,33 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
                     onMouseLeave={() => setIsZoomed(false)}
                     onClick={() => { setShowGallery(true); setGalleryIndex(idx); }}
                   >
-                    <img 
-                      src={img}
-                      alt={mainVendorProduct.name}
-                      className="w-full h-full object-contain p-8 lg:p-12 transition-transform duration-300"
-                      style={{
-                        transform: isZoomed && selectedImage === idx ? 'scale(1.05)' : 'scale(1)',
-                      }}
-                    />
+                    {is3DFile(img) ? (
+                      <div className="w-full h-full bg-[#f8fafc] dark:bg-slate-900">
+                        <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0, 4], fov: 45 }}>
+                          <Suspense fallback={
+                            <Html center>
+                              <div className="flex items-center justify-center">
+                                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                              </div>
+                            </Html>
+                          }>
+                            <Stage environment="city" intensity={0.6} contactShadow={{ opacity: 0.5, blur: 2 }} adjustCamera={true}>
+                               <Product3DViewer url={img} />
+                            </Stage>
+                          </Suspense>
+                          <OrbitControls makeDefault minPolarAngle={0} maxPolarAngle={Math.PI / 1.75} />
+                        </Canvas>
+                      </div>
+                    ) : (
+                      <img 
+                        src={img}
+                        alt={mainVendorProduct.name}
+                        className="w-full h-full object-contain p-8 lg:p-12 transition-transform duration-300"
+                        style={{
+                          transform: isZoomed && selectedImage === idx ? 'scale(1.05)' : 'scale(1)',
+                        }}
+                      />
+                    )}
 
                     {/* Lens UI */}
                     {isZoomed && selectedImage === idx && (
@@ -672,7 +767,7 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
                 <img src={mainVendorWrap.vendor.logo} alt="" className="max-w-full max-h-full object-contain" />
               </div>
               <div className="flex-1">
-                <p className="text-xs font-black text-slate-500 uppercase tracking-tighter mb-1">Authentic Product From</p>
+                <p className="text-xs font-black text-slate-500 uppercase tracking-tighter mb-1">{t('authenticProductFrom', 'Authentic Product From')}</p>
                 <div className="flex items-center justify-between">
                   <h4 className="font-black text-lg underline decoration-primary/30 underline-offset-4 group-hover/vendor:text-primary transition-colors">{mainVendorWrap.vendor.name}</h4>
                   <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-yellow-400/10 text-yellow-500">
@@ -722,9 +817,21 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
                       <span>🛒 {t('common:addToCart', 'Add to Cart')}</span>
                     )}
                   </button>
+
+                  <button
+                    onClick={() => {
+                        const type = mainVendorProduct?.category?.name?.toLowerCase()?.includes('pant') || mainVendorProduct?.category?.name?.toLowerCase()?.includes('trouser') ? 'bottom' : 'top';
+                        (window as any).tryOnProduct?.(model3d || images[0], type);
+                    }}
+                    className="w-12 sm:w-16 rounded-xl sm:rounded-2xl border flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-lg bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800"
+                    title="Virtual Try-On"
+                  >
+                    <span className="text-xl">👕</span>
+                  </button>
+
                   <button
                     onClick={() => onToggleWishlist(mainVendorProduct.id)}
-                    className="w-12 sm:flex-1 rounded-xl sm:rounded-2xl border flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-lg"
+                    className="w-12 sm:w-16 rounded-xl sm:rounded-2xl border flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-lg"
                     style={{
                       background: wishlistItems.includes(mainVendorProduct.id) ? tokens.gradients.primary : 'transparent',
                       borderColor: tokens.colors[mode].border.DEFAULT,
@@ -1104,12 +1211,29 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
               onSlideChange={(idx) => setGalleryIndex(idx)}
             >
               {images.map((img: string, idx: number) => (
-                <div key={idx} className="flex items-center justify-center p-4">
-                  <img 
-                    src={img} 
-                    alt="Gallery Full" 
-                    className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl"
-                  />
+                <div key={idx} className="flex items-center justify-center p-4 h-[85vh]">
+                  {is3DFile(img) ? (
+                    <div className="w-full h-full">
+                      <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0, 5], fov: 45 }}>
+                        <Suspense fallback={
+                          <Html center>
+                            <Loader2 className="w-12 h-12 text-white animate-spin" />
+                          </Html>
+                        }>
+                          <Stage environment="night" intensity={0.5} adjustCamera={true}>
+                            <Product3DViewer url={img} />
+                          </Stage>
+                        </Suspense>
+                        <OrbitControls makeDefault />
+                      </Canvas>
+                    </div>
+                  ) : (
+                    <img 
+                      src={img} 
+                      alt="Gallery Full" 
+                      className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+                    />
+                  )}
                 </div>
               ))}
             </Carousel>

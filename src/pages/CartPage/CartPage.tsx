@@ -45,7 +45,7 @@ export function CartPage({
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen py-8">
+      <div className="min-h-screen py-4 md:py-8">
         <SEO title={t('common:cart')} />
         <BreadCrumb 
           items={[
@@ -53,9 +53,9 @@ export function CartPage({
             { label: t('shoppingCart'), path: '/cart' }
           ]}
         />
-        <div className="max-w-7xl mx-auto px-6 mt-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 mt-4 md:mt-8">
           <h1 
-            className="text-6xl font-black mb-12"
+            className="text-3xl sm:text-5xl md:text-6xl font-black mb-8 md:mb-12"
             style={{ color: tokens.colors[mode].text.primary }}
           >
             {t('shoppingCart')}
@@ -67,7 +67,7 @@ export function CartPage({
   }
 
   return (
-    <div className="min-h-screen py-8">
+    <div className="min-h-screen py-4 md:py-8">
       <SEO title={t('common:cart')} />
       <BreadCrumb 
         items={[
@@ -76,36 +76,38 @@ export function CartPage({
         ]}
       />
 
-      <div className="max-w-7xl mx-auto px-6 mt-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 mt-4 md:mt-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-16">
-          <h1 
-            className="text-6xl font-black"
-            style={{ color: tokens.colors[mode].text.primary }}
-          >
-            {t('shoppingCart')} 
-            <span className="text-3xl opacity-30 ml-3">
-              ({items.reduce((sum, item) => sum + item.quantity, 0)} {items.reduce((sum, item) => sum + item.quantity, 0) <= 1 ? t('item') : t('items')})
-            </span>
-          </h1>
-          <Link
-            to="/"
-            className="px-8 py-4 rounded-2xl font-black transition-all duration-500 hover:scale-[1.05] active:scale-95 shadow-xl flex items-center gap-3"
-            style={{
-              background: tokens.colors[mode].surface.elevated,
-              color: tokens.colors[mode].text.primary,
-              border: `2px solid ${tokens.colors[mode].border.DEFAULT}`
-            }}
-          >
-            <span className="text-xl">←</span> {t('continueShopping')}
-          </Link>
+        <div className="mb-5 md:mb-16">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <h1 
+              className="text-xl sm:text-4xl md:text-6xl font-black leading-tight"
+              style={{ color: tokens.colors[mode].text.primary }}
+            >
+              {t('shoppingCart')}
+            </h1>
+            <Link
+              to="/"
+              className="px-3 sm:px-8 py-2 sm:py-4 rounded-xl sm:rounded-2xl font-bold transition-all duration-300 hover:scale-[1.03] active:scale-95 shadow-sm sm:shadow-xl flex items-center gap-1.5 sm:gap-3 text-xs sm:text-base"
+              style={{
+                background: tokens.colors[mode].surface.elevated,
+                color: tokens.colors[mode].text.primary,
+                border: `1.5px solid ${tokens.colors[mode].border.DEFAULT}`
+              }}
+            >
+              <span>←</span> {t('continueShopping')}
+            </Link>
+          </div>
+          <p className="text-sm opacity-40 mt-1" style={{ color: tokens.colors[mode].text.primary }}>
+            {items.reduce((sum, item) => sum + item.quantity, 0)} {items.reduce((sum, item) => sum + item.quantity, 0) <= 1 ? t('item') : t('items')}
+          </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-12">
+        <div className="grid lg:grid-cols-3 gap-4 md:gap-12">
           {/* Cart Items - Left Side */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-4 md:space-y-8">
             <div 
-              className="rounded-[45px] p-10 shadow-2xl relative overflow-hidden group"
+              className="rounded-[20px] sm:rounded-[35px] md:rounded-[45px] p-4 sm:p-6 md:p-10 shadow-lg md:shadow-2xl relative overflow-hidden group"
               style={{
                 background: tokens.colors[mode].surface.elevated,
                 backdropFilter: 'blur(30px)',
@@ -115,16 +117,16 @@ export function CartPage({
               <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -mr-32 -mt-32 group-hover:scale-150 transition-transform duration-1000" />
               
               <h2 
-                className="text-3xl font-black mb-10 relative z-10 flex items-center gap-4"
+                className="text-xl sm:text-2xl md:text-3xl font-black mb-4 sm:mb-6 md:mb-10 relative z-10 flex items-center gap-2 sm:gap-4"
                 style={{ color: tokens.colors[mode].text.primary }}
               >
                 📦 {t('cartItems')}
               </h2>
-              <div className="space-y-8 relative z-10">
+              <div className="space-y-3 sm:space-y-5 md:space-y-8 relative z-10">
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="p-8 rounded-[35px] transition-all duration-300 hover:scale-[1.01]"
+                    className="p-3 sm:p-5 md:p-8 rounded-[16px] sm:rounded-[25px] md:rounded-[35px] transition-all duration-300 hover:scale-[1.01]"
                     style={{
                       background: tokens.colors[mode].surface.base,
                       border: `1px solid ${tokens.colors[mode].border.DEFAULT}`
