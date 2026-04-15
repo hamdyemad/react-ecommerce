@@ -1,12 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/utils/cn';
 import { useTheme } from '../../../hooks/useTheme';
 import { useDirection } from '../../../hooks/useDirection';
-import { useCatalog } from '../../../hooks/useCatalog';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n';
 import { tokens } from '../../../tokens';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Stage, Html } from '@react-three/drei';
+import { Product3DViewer } from '../../atoms/Product3DViewer/Product3DViewer';
+import { ErrorBoundary } from '../../atoms/ErrorBoundary/ErrorBoundary';
+import { is3DFile } from '../../../utils/3d';
+import { Loader2, AlertCircle } from 'lucide-react';
+import { CurrencyDisplay } from '../../atoms/CurrencyDisplay';
+import * as THREE from 'three';
 
 
 export interface ProductCardProps {
@@ -21,12 +28,13 @@ export interface ProductCardProps {
   is_fav?: boolean;
   slug: string;
   onAddToCart?: (id: string | number) => void;
-  onToggleWishlist?: (id: string | number) => void;
+  onToggleWishlist?: (data: any) => void;
   isInWishlist?: boolean;
   className?: string;
   discount?: number | null;
   points?: number;
-  showAddToCart?: boolean; // Optional prop to hide Add to Cart button
+  showAddToCart?: boolean;
+  model_3d?: string;
   vendor?: { id: number; name: string; slug: string } | null;
   brand?: { id: number; title: string | null; slug: string } | null;
   department?: { id: number; name: string; slug: string } | null;
@@ -58,11 +66,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   category,
   sub_category,
   remaining_stock: propRemainingStock = 0,
+  model_3d,
 }) => {
   const { t } = useTranslation();
   const { mode } = useTheme();
-  const { country, selectedCountry } = useDirection();
-  const { countries } = useCatalog();
+  const { selectedCountry } = useDirection();
   const isRTL = i18n.language === 'ar';
   
   const remaining_stock = propRemainingStock;
@@ -74,8 +82,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     setIsFavorited(isInWishlist);
   }, [isInWishlist]);
 
-  const activeCountry = selectedCountry || countries?.find(c => c.code === country) || countries?.[0];
-  const currency = activeCountry?.currency || { code: '$', use_image: false, image: '' };
 
   // Convert string prices to numbers for calculation if possible
   const currentPrice = typeof real_price === 'string' ? parseFloat(real_price) : real_price;
@@ -92,7 +98,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     e.preventDefault();
     setIsFavorited(!isFavorited);
     if (onToggleWishlist) {
-      onToggleWishlist(id);
+      onToggleWishlist({
+        id,
+        name,
+        image,
+        slug,
+        real_price,
+        fake_price,
+        review_avg_star,
+        reviews_count,
+        brand,
+        department,
+        category,
+        sub_category,
+        remaining_stock
+      });
     }
   };
 
@@ -121,18 +141,47 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         className="block relative aspect-square overflow-hidden bg-slate-50 dark:bg-slate-800/50 rounded-t-[1.65rem]"
       >
 
-        <img
-          src={image || 'https://via.placeholder.com/500?text=No+Image'}
-          alt={name}
-          className="w-full h-full object-cover transition-all duration-700"
-          style={{
-            transform: isHovered ? 'scale(1.1)' : 'scale(1)',
-          }}
-          loading="lazy"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/500?text=No+Image';
-          }}
-        />
+        {(is3DFile(image) || is3DFile(model_3d)) ? (
+          <div className="w-full h-full bg-slate-50 dark:bg-slate-900/50 relative">
+             <ErrorBoundary fallback={
+                <div className="flex flex-col items-center justify-center h-full gap-2 p-4 text-center">
+                  <AlertCircle className="w-8 h-8 text-rose-500/50" />
+                  <span className="text-[10px] font-black uppercase tracking-widest opacity-40">3D Asset Error</span>
+                </div>
+             }>
+                <Canvas shadows={{ type: THREE.PCFShadowMap }} dpr={[1, 2]} camera={{ position: [0, 0, 4], fov: 40 }}>
+                   <Suspense fallback={
+                      <Html center>
+                        <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                      </Html>
+                   }>
+                      <Stage environment="city" intensity={0.5} adjustCamera={true}>
+                        <Product3DViewer url={model_3d || image} />
+                      </Stage>
+                   </Suspense>
+                   <OrbitControls 
+                     enableZoom={false} 
+                     autoRotate={isHovered} 
+                     autoRotateSpeed={4} 
+                     makeDefault 
+                   />
+                </Canvas>
+             </ErrorBoundary>
+          </div>
+        ) : (
+          <img
+            src={image || 'https://placehold.co/500?text=No+Image'}
+            alt={name}
+            className="w-full h-full object-cover transition-all duration-700"
+            style={{
+              transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+            }}
+            loading="lazy"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = 'https://placehold.co/500?text=No+Image';
+            }}
+          />
+        )}
         
         {/* Badges - Top Left */}
         <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
@@ -387,27 +436,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         )}
 
-        {/* Price */}
         <div className="flex flex-wrap items-baseline gap-2 mb-2">
           <span 
-            className="text-xl sm:text-2xl font-black flex items-center gap-1.5"
+            className="text-xl sm:text-2xl font-black"
             style={{ 
               background: 'linear-gradient(135deg, #818cf8 0%, #c084fc 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}
           >
-            {currentPrice?.toFixed(2) || '0.00'}
+            <CurrencyDisplay amount={currentPrice || 0} size="lg" />
           </span>
-          {currency && (
-            currency.use_image && currency.image ? (
-              <img src={currency.image} alt={currency.code} className="w-5 h-5 object-contain inline-block" />
-            ) : (
-              <span className="text-sm font-black" style={{ color: mode === 'light' ? '#818cf8' : '#c084fc' }}>
-                {currency.code}
-              </span>
-            )
-          )}
         </div>
         
         {showAddToCart && onAddToCart && (

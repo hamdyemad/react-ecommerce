@@ -1,247 +1,15 @@
-import React, { useState, Suspense, useRef, useMemo } from 'react';
-import { Canvas, useLoader } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment, useTexture, useGLTF, Center, Html } from '@react-three/drei';
+import { useState, Suspense, useRef } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera, Environment, Html } from '@react-three/drei';
 import { motion, AnimatePresence } from 'motion/react';
 import { Shirt, User, X, Maximize2, Minimize2, Loader2 } from 'lucide-react';
 import * as THREE from 'three';
 // @ts-ignore
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 
-// Simple Error Boundary to catch 3D loading errors (CORS, 404s, etc)
-class ErrorBoundary extends React.Component<{ children: React.ReactNode, fallback: React.ReactNode }, { hasError: boolean }> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError() { return { hasError: true }; }
-  render() {
-    if (this.state.hasError) return this.props.fallback;
-    return this.props.children;
-  }
-}
-
-// Use Vite Proxy for local storage URLs to bypass CORS totally
-const prepareUrl = (url: string) => {
-  if (!url) return '';
-  if (url.includes(':8000/storage') && (url.toLowerCase().endsWith('.obj') || url.toLowerCase().endsWith('.glb'))) {
-    const relative = url.split(':8000')[1];
-    console.log(`[TryOn] Normalizing ${url} -> ${relative}`);
-    return relative;
-  }
-  return url;
-};
-
-
-
-function ObjModel({ url, type }: { url: string, type: 'top' | 'bottom' }) {
-  const [localUrl, setLocalUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  React.useEffect(() => {
-    let active = true;
-    const originsToTry = [url];
-    console.log(`[TryOn] Attempting load:`, url);
-    if (url.includes('127.0.0.1')) originsToTry.push(url.replace('127.0.0.1', 'localhost'));
-    else if (url.includes('localhost')) originsToTry.push(url.replace('localhost', '127.0.0.1'));
-
-    const tryFetch = (index: number) => {
-      if (index >= originsToTry.length) {
-        if (active) setError('Failed to fetch from all origins');
-        return;
-      }
-
-      fetch(originsToTry[index], { mode: 'cors' })
-        .then(res => {
-          console.log(`[TryOn] Fetch Status: ${res.status} for ${originsToTry[index]}`);
-          if (!res.ok) throw new Error(`HTTP ${res.status} on ${originsToTry[index]}`);
-          return res.blob();
-        })
-        .then(blob => {
-          if (active) {
-            console.log(`Successfully loaded model from: ${originsToTry[index]}`);
-            setLocalUrl(URL.createObjectURL(blob));
-          }
-        })
-        .catch((err) => {
-          if (active) {
-            console.warn(`[TryOn] Fetch failed for ${originsToTry[index]}:`, err.message);
-            if (index + 1 >= originsToTry.length) setError(err.message);
-            else tryFetch(index + 1);
-          }
-        });
-    };
-
-    tryFetch(0);
-    return () => { 
-      active = false; 
-      if (localUrl) URL.revokeObjectURL(localUrl);
-    };
-  }, [url]);
-
-  // If the remote model fails, return a high-end placeholder garment
-  if (error) return <PlaceholderGarment type={type} error={error} />;
-  if (!localUrl) return null;
-
-  return <ObjLoaderInternal url={localUrl} />;
-}
-
-function PlaceholderGarment({ type, error }: { type: 'top' | 'bottom', error?: string | null }) {
-  return (
-    <group position={[0, 0, 0]}>
-      {error && (
-        <Html position={[0, 1.5, 0]} center>
-          <div className="bg-red-500/90 text-white text-[8px] p-2 rounded-lg whitespace-nowrap backdrop-blur-sm border border-red-400">
-            LOAD ERROR: {error}
-          </div>
-        </Html>
-      )}
-      {type === 'top' ? (
-         <group>
-           {/* Stylized Block Shirt */}
-           <mesh position={[0, 0, 0]}>
-             <boxGeometry args={[0.5, 0.6, 0.25]} />
-             <meshStandardMaterial color="#334155" metalness={0.5} roughness={0.5} opacity={0.8} transparent />
-           </mesh>
-           <mesh position={[0.35, 0.1, 0]} rotation={[0, 0, 0.4]}>
-             <boxGeometry args={[0.2, 0.4, 0.15]} />
-             <meshStandardMaterial color="#334155" metalness={0.5} roughness={0.5} opacity={0.8} transparent />
-           </mesh>
-           <mesh position={[-0.35, 0.1, 0]} rotation={[0, 0, -0.4]}>
-             <boxGeometry args={[0.2, 0.4, 0.15]} />
-             <meshStandardMaterial color="#334155" metalness={0.5} roughness={0.5} opacity={0.8} transparent />
-           </mesh>
-         </group>
-      ) : (
-         <group>
-           {/* Stylized Block Pants */}
-           <mesh position={[0.12, -0.2, 0]}>
-             <boxGeometry args={[0.2, 0.8, 0.2]} />
-             <meshStandardMaterial color="#1e293b" metalness={0.5} roughness={0.5} opacity={0.8} transparent />
-           </mesh>
-           <mesh position={[-0.12, -0.2, 0]}>
-             <boxGeometry args={[0.2, 0.8, 0.2]} />
-             <meshStandardMaterial color="#1e293b" metalness={0.5} roughness={0.5} opacity={0.8} transparent />
-           </mesh>
-         </group>
-      )}
-    </group>
-  );
-}
-
-function ObjLoaderInternal({ url }: { url: string }) {
-  const obj = useLoader(OBJLoader, url, (loader) => {
-    loader.setCrossOrigin('anonymous');
-  });
-  const clonedObj = useMemo(() => {
-    const clone = obj.clone();
-    clone.traverse((child: any) => {
-      if (child instanceof THREE.Mesh) {
-        if (!child.material || (Array.isArray(child.material) && child.material.length === 0) || (child.material as any).color?.getHex() === 0xffffff) {
-           child.material = new THREE.MeshStandardMaterial({ 
-             color: '#cbd5e1',
-             metalness: 0.2,
-             roughness: 0.5,
-             side: THREE.DoubleSide
-           });
-        }
-      }
-    });
-    return clone;
-  }, [obj]);
-
-  return <primitive object={clonedObj} />;
-}
-
-function GltfModel({ url, type }: { url: string, type: 'top' | 'bottom' }) {
-  const [localUrl, setLocalUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  React.useEffect(() => {
-    let active = true;
-    const originsToTry = [url];
-    console.log(`[TryOn] Attempting GLTF load:`, url);
-    if (url.includes('127.0.0.1')) originsToTry.push(url.replace('127.0.0.1', 'localhost'));
-    else if (url.includes('localhost')) originsToTry.push(url.replace('localhost', '127.0.0.1'));
-
-    const tryFetch = (index: number) => {
-      if (index >= originsToTry.length) {
-        if (active) setError('Failed to fetch from all origins');
-        return;
-      }
-
-      fetch(originsToTry[index], { mode: 'cors' })
-        .then(res => {
-          console.log(`[TryOn] GLTF Status: ${res.status} for ${originsToTry[index]}`);
-          if (!res.ok) throw new Error(`HTTP ${res.status} on ${originsToTry[index]}`);
-          return res.blob();
-        })
-        .then(blob => {
-          if (active) {
-            console.log(`Successfully loaded GLTF from: ${originsToTry[index]}`);
-            setLocalUrl(URL.createObjectURL(blob));
-          }
-        })
-        .catch((err) => {
-          if (active) {
-            console.warn(`[TryOn] GLTF failed for ${originsToTry[index]}:`, err.message);
-            if (index + 1 >= originsToTry.length) setError(err.message);
-            else tryFetch(index + 1);
-          }
-        });
-    };
-
-    tryFetch(0);
-    return () => { 
-      active = false; 
-      if (localUrl) URL.revokeObjectURL(localUrl);
-    };
-  }, [url]);
-
-  if (error) return <PlaceholderGarment type={type} error={error} />;
-  if (!localUrl) return null;
-
-  return <GltfLoaderInternal url={localUrl} />;
-}
-
-function GltfLoaderInternal({ url }: { url: string }) {
-  const { scene } = useGLTF(url, undefined, undefined, (loader) => {
-    loader.setCrossOrigin('anonymous');
-  });
-  return <primitive object={scene} />;
-}
-
-function TexturePlane({ url, type }: { url: string, type: 'top' | 'bottom' }) {
-  const texture = useTexture(url);
-  return (
-    <mesh position={[0, type === 'top' ? 0.5 : -0.8, 0.51]}>
-      <planeGeometry args={type === 'top' ? [1.5, 1.5] : [1.2, 1.8]} />
-      <meshStandardMaterial map={texture} transparent={true} side={THREE.DoubleSide} />
-    </mesh>
-  );
-}
-
-function ModelRenderer({ url, type }: { url: string, type: 'top' | 'bottom' }) {
-  const isObj = url.toLowerCase().endsWith('.obj');
-  const isGltf = url.toLowerCase().endsWith('.gltf') || url.toLowerCase().endsWith('.glb');
-
-  if (isObj) {
-    return (
-      <Center position={[0, type === 'top' ? 0.5 : -0.8, 0.6]}>
-        <ObjModel url={url} type={type} />
-      </Center>
-    );
-  }
-
-  if (isGltf) {
-    return (
-      <Center position={[0, type === 'top' ? 0.5 : -0.8, 0.6]}>
-        <GltfModel url={url} type={type} />
-      </Center>
-    );
-  }
-
-  return <TexturePlane url={url} type={type} />;
-}
+import { ErrorBoundary } from '../../atoms/ErrorBoundary/ErrorBoundary';
+import { Product3DViewer } from '../../atoms/Product3DViewer/Product3DViewer';
+import { prepare3DUrl } from '../../../utils/3d';
 
 function Mannequin({ topModel, bottomModel }: { topModel?: string, bottomModel?: string }) {
   const meshRef = useRef<THREE.Group>(null);
@@ -288,7 +56,7 @@ function Mannequin({ topModel, bottomModel }: { topModel?: string, bottomModel?:
         {topModel && (
           <Suspense fallback={null}>
             <group position={[0, 1.3, 0.1]}>
-               <ModelRenderer url={topModel} type="top" />
+               <Product3DViewer url={topModel} />
             </group>
           </Suspense>
         )}
@@ -296,7 +64,7 @@ function Mannequin({ topModel, bottomModel }: { topModel?: string, bottomModel?:
         {bottomModel && (
           <Suspense fallback={null}>
             <group position={[0, 0.4, 0.1]}>
-               <ModelRenderer url={bottomModel} type="bottom" />
+               <Product3DViewer url={bottomModel} />
             </group>
           </Suspense>
         )}
@@ -396,7 +164,7 @@ export function VirtualTryOn() {
                     </button>
                   </div>
                 }>
-                  <Canvas shadows dpr={[1, 2]}>
+                  <Canvas shadows={{ type: THREE.PCFShadowMap }} dpr={[1, 2]}>
                     <PerspectiveCamera makeDefault position={[0, 0.8, 5]} fov={45} />
                     <ambientLight intensity={0.5} />
                     <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
@@ -411,8 +179,8 @@ export function VirtualTryOn() {
                       </Html>
                     }>
                       <Mannequin 
-                        topModel={prepareUrl(activeTop || '')} 
-                        bottomModel={prepareUrl(activeBottom || '')} 
+                        topModel={prepare3DUrl(activeTop || '')} 
+                        bottomModel={prepare3DUrl(activeBottom || '')} 
                       />
                     </Suspense>
 

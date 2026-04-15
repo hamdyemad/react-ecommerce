@@ -61,6 +61,7 @@ export function ProductGrid({
               onAddToCart={onAddToCart}
               onToggleWishlist={onToggleWishlist}
               isInWishlist={wishlistItems.includes(product.id)}
+              model_3d={product.model_3d}
             />
 
           );

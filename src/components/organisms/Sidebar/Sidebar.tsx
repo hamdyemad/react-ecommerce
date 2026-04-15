@@ -64,7 +64,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         { label: t('returnPolicy'), path: '/return-policy', icon: '↩️' },
         { label: t('termsSubtitle'), path: '/terms', icon: '📋' },
         { label: t('contactUs'), path: '/contact', icon: '📞' },
-        { label: t('common:storeLocator', 'Store Locator'), path: '#', icon: '📍' },
+        { label: t('common:storeLocator', 'Store Locator'), path: '/store-locator', icon: '📍' },
       ]
     }
   ];

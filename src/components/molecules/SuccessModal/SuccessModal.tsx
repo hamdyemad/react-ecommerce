@@ -5,6 +5,8 @@ import { useDirection } from '../../../hooks/useDirection';
 import { Button } from '../../atoms/Button';
 import { useNavigate } from 'react-router-dom';
 
+import { ProductThumbnail } from '../ProductThumbnail';
+
 interface SuccessModalProps {
   orderData: any;
   onClose: () => void;
@@ -79,11 +81,16 @@ export function SuccessModal({ orderData, onClose }: SuccessModalProps) {
                 <div className="space-y-3">
                   {orderData.products?.map((item: any) => (
                     <div key={item.id} className="flex gap-4 p-3 rounded-2xl bg-[var(--color-surface-elevated)] border border-[var(--color-border-DEFAULT)]">
-                      <img src={item.product.image} className="w-14 h-14 rounded-xl object-cover bg-slate-100" />
+                      <ProductThumbnail 
+                         image={item.product.image} 
+                         name={item.product.name} 
+                         size="sm" 
+                         className="bg-slate-100 dark:bg-slate-800"
+                      />
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-sm line-clamp-1">{item.product.name}</h4>
                         <div className="flex justify-between items-center mt-1">
-                          <span className="text-xs opacity-60 font-bold">Qty: {item.quantity}</span>
+                          <span className="text-xs opacity-60 font-bold">{t('qty')}: {item.quantity}</span>
                           <span className="text-sm font-black text-primary">{item.total} {currency}</span>
                         </div>
                       </div>

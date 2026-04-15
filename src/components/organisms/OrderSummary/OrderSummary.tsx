@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../hooks/useTheme';
 import { useDirection } from '../../../hooks/useDirection';
@@ -6,6 +7,8 @@ import { tokens } from '../../../tokens';
 import { PriceBreakdown } from '../../molecules/PriceBreakdown';
 import { orderService } from '../../../services/orderService';
 import { toast } from 'react-hot-toast';
+
+import { ProductThumbnail } from '../../molecules/ProductThumbnail';
 
 interface OrderSummaryProps {
   items: any[];
@@ -91,7 +94,12 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
         <div className="space-y-3 mb-5 md:mb-8 max-h-[250px] overflow-y-auto pr-2 no-scrollbar border-b border-slate-100 dark:border-slate-800 pb-4 md:pb-6 relative z-10">
           {items.map((item) => (
             <div key={item.id} className="flex gap-3">
-              <img src={item.image} className="w-14 h-14 rounded-xl object-cover bg-slate-100" alt={item.title} />
+              <ProductThumbnail 
+                 image={item.image} 
+                 name={item.title} 
+                 size="sm" 
+                 className="w-14 h-14 bg-slate-100"
+              />
               <div className="flex-1 min-w-0">
                 <h4 className="font-bold text-sm line-clamp-1">{item.title}</h4>
                 {item.variant && (
@@ -186,6 +194,25 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
         )}
       </div>
 
+      {isCheckout && (
+        <p className="text-[10px] sm:text-xs text-center mb-4 opacity-60 font-medium px-4 leading-relaxed relative z-10">
+          {t('common:agreeTerms').split(t('common:termsAndConditions')).map((part, index, array) => (
+            <React.Fragment key={index}>
+              {part}
+              {index < array.length - 1 && (
+                <Link 
+                  to="/terms" 
+                  className="text-primary hover:underline underline-offset-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {t('common:termsAndConditions')}
+                </Link>
+              )}
+            </React.Fragment>
+          ))}
+        </p>
+      )}
+
       {/* Action Button (Checkout or Place Order) — AFTER promo code */}
       <button
         onClick={onAction}
@@ -201,12 +228,6 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
           {actionLoading ? '...' : actionLabel}
         </span>
       </button>
-
-      {isCheckout && (
-        <p className="text-[10px] text-center mt-4 md:mt-6 opacity-40 font-bold px-4 leading-relaxed relative z-10">
-          {t('byConfirmingYouAgree', 'By confirming your order, you agree to our Terms and Conditions')}
-        </p>
-      )}
     </div>
   );
 };

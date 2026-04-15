@@ -50,6 +50,7 @@ import { AllProductsPage } from './pages/AllProductsPage';
 import { NewArrivalsPage } from './pages/NewArrivalsPage';
 import { StoreLocatorPage } from './pages/StoreLocatorPage';
 import { TrackOrderPage } from './pages/TrackOrderPage/TrackOrderPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 import { SocialCallbackPage } from './pages/SocialCallbackPage';
 import { Toaster } from 'react-hot-toast';
 import { GuestRoute } from './components/atoms/GuestRoute';
@@ -378,12 +379,8 @@ function DemoContent() {
     setShowCart(false);
   };
 
-  const handleToggleWishlist = async (id: string | number) => {
-    if (typeof id === 'number') {
-      await toggleWishlist(id);
-    } else {
-      await toggleWishlist(parseInt(id));
-    }
+  const handleToggleWishlist = async (data: any) => {
+    await toggleWishlist(data);
   };
 
   // Financial Calculation
@@ -522,6 +519,9 @@ function DemoContent() {
           <Route path="/profile/payment" element={<ProtectedRoute><PaymentPage /></ProtectedRoute>} />
           <Route path="/profile/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
           <Route path="/profile/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+          
+          {/* 404 Case */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { useParams, Link } from 'react-router-dom';
@@ -13,11 +13,15 @@ import { reviewService } from '../../services/reviewService';
 import type { ProductDetail } from '../../types/product';
 import type { Review } from '../../types/review';
 import { tokens } from '../../tokens';
-import { Canvas, useLoader } from '@react-three/fiber';
-import { OrbitControls, useGLTF, Stage, Html } from '@react-three/drei';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Stage, Html } from '@react-three/drei';
+import { Loader2, AlertCircle } from 'lucide-react';
 // @ts-ignore
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
-import { Loader2 } from 'lucide-react';
+import { ErrorBoundary } from '../../components/atoms/ErrorBoundary/ErrorBoundary';
+import { Product3DViewer } from '../../components/atoms/Product3DViewer/Product3DViewer';
+import { is3DFile } from '../../utils/3d';
+import * as THREE from 'three';
 
 interface ProductDetailsPageProps {
   onAddToCart: (data: { 
@@ -32,7 +36,7 @@ interface ProductDetailsPageProps {
       variant_name?: string | null;
     }
   }) => void;
-  onToggleWishlist: (id: string | number) => void;
+  onToggleWishlist: (data: any) => void;
   wishlistItems: (string | number)[];
   isLoading?: boolean;
 }
@@ -52,6 +56,38 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
   const [activeTab, setActiveTab] = useState('details');
   const [showGallery, setShowGallery] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
+
+  const mainVendorWrap = product?.vendors[0];
+  const mainVendorProduct = mainVendorWrap?.vendor_product;
+
+  const tabs = useMemo(() => {
+    if (!mainVendorProduct || !product) return [];
+    
+    return [
+      { id: 'details', label: 'Details', icon: '📋' },
+      { id: 'summary', label: 'Summary', icon: '📝' },
+      { id: 'features', label: 'Features', icon: '✨' },
+      { id: 'instructions', label: 'Instructions', icon: '📖' },
+      { id: 'material', label: 'Material', icon: '🧶' },
+      { id: 'extras', label: 'Extras', icon: '➕' },
+      { id: 'reviews', label: 'Reviews', icon: '⭐' }
+    ].filter(tab => {
+      if (tab.id === 'details') return !!mainVendorProduct.details || !!product.details;
+      if (tab.id === 'summary') return !!mainVendorProduct.summary || !!product.summary;
+      if (tab.id === 'features') return !!mainVendorProduct.features || !!product.features;
+      if (tab.id === 'instructions') return !!mainVendorProduct.instructions || !!product.instructions;
+      if (tab.id === 'material') return !!mainVendorProduct.material || !!product.material;
+      if (tab.id === 'extras') return !!mainVendorProduct.extras || !!product.extras;
+      return true;
+    });
+  }, [mainVendorProduct, product]);
+
+  // Ensure active tab is valid
+  useEffect(() => {
+    if (tabs.length > 0 && !tabs.find(t => t.id === activeTab)) {
+      setActiveTab(tabs[0].id);
+    }
+  }, [tabs, activeTab]);
   
   // High-end zoom state
   const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
@@ -115,9 +151,6 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
 
     fetchProduct();
   }, [slug]);
-
-  const mainVendorWrap = product?.vendors[0];
-  const mainVendorProduct = mainVendorWrap?.vendor_product;
 
   // Fetch reviews function
   const fetchReviews = async (page: number = 1) => {
@@ -236,51 +269,7 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
 
   // Media resolution must happen before early returns to satisfy React Hook rules
   // 1. Helpers
-  const is3DFile = (url: string) => {
-    if (!url) return false;
-    const path = url.split('?')[0].toLowerCase();
-    return path.endsWith('.glb') || path.endsWith('.obj') || path.endsWith('.gltf');
-  };
-
-  const prepare3DUrl = (url: string) => {
-    if (!url) return '';
-    if (url.includes(':8000/storage') && is3DFile(url)) {
-      return url.split(':8000')[1];
-    }
-    return url;
-  };
-
-  const Product3DViewer = ({ url }: { url: string }) => {
-    const normalizedUrl = prepare3DUrl(url);
-    const isGLB = url.split('?')[0].toLowerCase().endsWith('.glb');
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-      fetch(normalizedUrl, { method: 'HEAD' })
-        .then(res => {
-          if (!res.ok) setError(`HTTP ${res.status}`);
-        })
-        .catch(err => setError(err.message));
-    }, [normalizedUrl]);
-
-    if (error) {
-      return (
-        <Html center>
-           <div className="bg-red-500 text-white text-[10px] p-2 rounded shadow-lg whitespace-nowrap">
-             {error}
-           </div>
-        </Html>
-      );
-    }
-    
-    if (isGLB) {
-      const { scene } = useGLTF(normalizedUrl);
-      return <primitive object={scene} />;
-    } else {
-      const obj = useLoader(OBJLoader, normalizedUrl);
-      return <primitive object={obj} />;
-    }
-  };
+  // Removed local is3DFile and prepare3DUrl, using shared ones from ../../utils/3d
 
   // 2. Memos
   const allMedia = useMemo(() => {
@@ -303,16 +292,13 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
     }
 
     const result = Array.from(mediaSet);
-    return result.length > 0 ? result : ['https://via.placeholder.com/600?text=No+Image'];
+    return result.length > 0 ? result : ['https://placehold.co/600?text=No+Image'];
   }, [mainVendorProduct, product, currentVariant]);
 
   const images = useMemo(() => {
-    return allMedia.length > 0 ? allMedia : ['https://via.placeholder.com/600?text=No+Image'];
+    return allMedia.length > 0 ? allMedia : ['https://placehold.co/600?text=No+Image'];
   }, [allMedia]);
 
-  const model3d = useMemo(() => {
-    return allMedia.find((m: string) => is3DFile(m));
-  }, [allMedia, is3DFile]);
 
   if (loading) {
     return (
@@ -340,23 +326,6 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
     );
   }
 
-  const tabs = [
-    { id: 'details', label: 'Details', icon: '📋' },
-    { id: 'summary', label: 'Summary', icon: '📝' },
-    { id: 'features', label: 'Features', icon: '✨' },
-    { id: 'instructions', label: 'Instructions', icon: '📖' },
-    { id: 'material', label: 'Material', icon: '🧶' },
-    { id: 'extras', label: 'Extras', icon: '➕' },
-    { id: 'reviews', label: 'Reviews', icon: '⭐' }
-  ].filter(tab => {
-    if (tab.id === 'details') return !!mainVendorProduct.details || !!product.details;
-    if (tab.id === 'summary') return !!mainVendorProduct.summary || !!product.summary;
-    if (tab.id === 'features') return !!mainVendorProduct.features || !!product.features;
-    if (tab.id === 'instructions') return !!mainVendorProduct.instructions || !!product.instructions;
-    if (tab.id === 'material') return !!mainVendorProduct.material || !!product.material;
-    if (tab.id === 'extras') return !!mainVendorProduct.extras || !!product.extras;
-    return true;
-  });
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -469,20 +438,33 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
                     onMouseLeave={() => setIsZoomed(false)}
                     onClick={() => { setShowGallery(true); setGalleryIndex(idx); }}
                   >
-                    {is3DFile(img) ? (
+                    {is3DFile(img) && selectedImage === idx ? (
                       <div className="w-full h-full bg-[#f8fafc] dark:bg-slate-900">
-                        <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0, 4], fov: 45 }}>
-                          <Suspense fallback={
+                        <Canvas 
+                          shadows={{ type: THREE.PCFShadowMap }} 
+                          dpr={[1, 2]} 
+                          camera={{ position: [0, 0, 4], fov: 45 }}
+                        >
+                          <ErrorBoundary fallback={
                             <Html center>
-                              <div className="flex items-center justify-center">
-                                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                              <div className="flex flex-col items-center gap-2 bg-slate-100/10 p-4 rounded-3xl backdrop-blur-md border border-white/20">
+                                <AlertCircle className="w-6 h-6 text-rose-500" />
+                                <span className="text-[10px] text-white/60 font-black uppercase tracking-widest text-center">3D View Error</span>
                               </div>
                             </Html>
                           }>
-                            <Stage environment="city" intensity={0.6} adjustCamera={true}>
-                               <Product3DViewer url={img} />
-                            </Stage>
-                          </Suspense>
+                            <Suspense fallback={
+                              <Html center>
+                                <div className="flex items-center justify-center">
+                                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                                </div>
+                              </Html>
+                            }>
+                              <Stage environment="city" intensity={0.6} adjustCamera={true}>
+                                 <Product3DViewer url={img} />
+                              </Stage>
+                            </Suspense>
+                          </ErrorBoundary>
                           <OrbitControls makeDefault minPolarAngle={0} maxPolarAngle={Math.PI / 1.75} />
                         </Canvas>
                       </div>
@@ -819,19 +801,23 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
                     )}
                   </button>
 
-                  <button
-                    onClick={() => {
-                        const type = mainVendorProduct?.category?.name?.toLowerCase()?.includes('pant') || mainVendorProduct?.category?.name?.toLowerCase()?.includes('trouser') ? 'bottom' : 'top';
-                        (window as any).tryOnProduct?.(model3d || images[0], type);
-                    }}
-                    className="w-12 sm:w-16 rounded-xl sm:rounded-2xl border flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-lg bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800"
-                    title="Virtual Try-On"
-                  >
-                    <span className="text-xl">👕</span>
-                  </button>
 
-                  <button
-                    onClick={() => onToggleWishlist(mainVendorProduct.id)}
+                   <button
+                    onClick={() => onToggleWishlist({
+                      id: mainVendorProduct.id,
+                      name: mainVendorProduct.name,
+                      image: mainVendorProduct.image,
+                      slug: mainVendorProduct.slug,
+                      real_price: currentPrice,
+                      fake_price: currentFake,
+                      review_avg_star: mainVendorProduct.review_avg_star,
+                      reviews_count: mainVendorProduct.reviews_count,
+                      brand: mainVendorProduct.brand,
+                      department: mainVendorProduct.department,
+                      category: mainVendorProduct.category,
+                      sub_category: mainVendorProduct.sub_category,
+                      remaining_stock: mainVendorProduct.remaining_stock
+                    })}
                     className="w-12 sm:w-16 rounded-xl sm:rounded-2xl border flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-lg"
                     style={{
                       background: wishlistItems.includes(mainVendorProduct.id) ? tokens.gradients.primary : 'transparent',
@@ -1017,7 +1003,7 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
                                 className="w-full sm:w-auto px-10 py-4 rounded-2xl font-black shadow-xl shadow-primary/20 hover:scale-105 transition-all text-sm uppercase tracking-widest"
                                 style={{ background: tokens.gradients.primary, color: '#fff' }}
                               >
-                                {t('common:login', 'Login Now')}
+                                {t('common:loginNow', 'Login Now')}
                               </Link>
                               <Link 
                                 to="/register"
@@ -1213,20 +1199,37 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
             >
               {images.map((img: string, idx: number) => (
                 <div key={idx} className="flex items-center justify-center p-4 h-[85vh]">
-                  {is3DFile(img) ? (
+                  {is3DFile(img) && galleryIndex === idx ? (
                     <div className="w-full h-full">
-                      <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0, 5], fov: 45 }}>
-                        <Suspense fallback={
-                          <Html center>
-                            <Loader2 className="w-12 h-12 text-white animate-spin" />
-                          </Html>
-                        }>
-                          <Stage environment="night" intensity={0.5} adjustCamera={true}>
-                            <Product3DViewer url={img} />
-                          </Stage>
-                        </Suspense>
-                        <OrbitControls makeDefault />
-                      </Canvas>
+                      <ErrorBoundary fallback={
+                        <Html center>
+                          <div className="flex flex-col items-center gap-2 bg-slate-100/10 p-4 rounded-3xl backdrop-blur-md border border-white/20">
+                            <AlertCircle className="w-6 h-6 text-rose-500" />
+                            <span className="text-[10px] text-white/60 font-black uppercase tracking-widest text-center">3D View Error</span>
+                          </div>
+                        </Html>
+                      }>
+                        <Canvas 
+                          shadows={{ type: THREE.PCFShadowMap }} 
+                          dpr={[1, 2]} 
+                          camera={{ position: [0, 0, 5], fov: 45 }}
+                        >
+                          <Suspense fallback={
+                            <Html center>
+                              <Loader2 className="w-12 h-12 text-white animate-spin" />
+                            </Html>
+                          }>
+                            <Stage environment="night" intensity={0.5} adjustCamera={true}>
+                              <Product3DViewer url={img} />
+                            </Stage>
+                          </Suspense>
+                          <OrbitControls makeDefault />
+                        </Canvas>
+                      </ErrorBoundary>
+                    </div>
+                  ) : is3DFile(img) ? (
+                    <div className="flex items-center justify-center text-white/40 font-black uppercase tracking-widest">
+                       Initializing Laboratory...
                     </div>
                   ) : (
                     <img 

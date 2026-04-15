@@ -21,7 +21,7 @@ export function CatalogProvider({ children }: { children: React.ReactNode }) {
   const [loadingCountries, setLoadingCountries] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { language } = useDirection();
+  const { country, selectedCountry, setSelectedCountry, language } = useDirection();
 
   const fetchCatalogData = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -36,8 +36,20 @@ export function CatalogProvider({ children }: { children: React.ReactNode }) {
 
       if (signal?.aborted) return;
 
-      setCountries(countriesRes.data);
-      setCategories(categoriesRes.data);
+      const fetchedCountries = countriesRes.data || [];
+      setCountries(fetchedCountries);
+      setCategories(categoriesRes.data || []);
+
+      // Automatically select default country if none is selected
+      if (fetchedCountries.length > 0 && !selectedCountry) {
+        const matched = fetchedCountries.find((c: Country) => c.code === country);
+        if (matched) {
+          setSelectedCountry(matched);
+        } else {
+          // Fallback to first available country if code doesn't match
+          setSelectedCountry(fetchedCountries[0]);
+        }
+      }
     } catch (err: any) {
       if (err.name === 'AbortError' || err.code === 'ERR_CANCELED') return;
       console.error('Catalog Fetch Error:', err);
@@ -46,7 +58,7 @@ export function CatalogProvider({ children }: { children: React.ReactNode }) {
       setLoadingCountries(false);
       setLoadingCategories(false);
     }
-  }, [language]);
+  }, [language, country, selectedCountry, setSelectedCountry]);
 
   useEffect(() => {
     const controller = new AbortController();

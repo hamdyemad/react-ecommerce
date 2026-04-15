@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/utils/cn';
 import { Button } from '@/components/atoms/Button';
 
@@ -11,12 +12,18 @@ export interface EmptyCartStateProps {
 }
 
 export const EmptyCartState: React.FC<EmptyCartStateProps> = ({
-  title = 'Your cart is empty',
-  message = 'Add items to your cart to get started',
-  actionLabel = 'Start Shopping',
+  title,
+  message,
+  actionLabel,
   onAction,
   className,
 }) => {
+  const { t } = useTranslation();
+  
+  const displayTitle = title || t('cartEmptyTitle', 'Your cart is empty');
+  const displayMessage = message || t('cartEmptyMessage', 'Add items to your cart to get started');
+  const displayActionLabel = actionLabel || t('startShopping', 'Start Shopping');
+
   return (
     <div
       className={cn(
@@ -43,15 +50,15 @@ export const EmptyCartState: React.FC<EmptyCartStateProps> = ({
       </div>
 
       {/* Title */}
-      <h3 className="text-xl font-semibold text-text-primary mb-2">{title}</h3>
+      <h3 className="text-xl font-semibold text-text-primary mb-2">{displayTitle}</h3>
 
       {/* Message */}
-      <p className="text-text-secondary mb-6 max-w-sm">{message}</p>
+      <p className="text-text-secondary mb-6 max-w-sm">{displayMessage}</p>
 
       {/* Action Button */}
       {onAction && (
         <Button onClick={onAction} variant="primary" size="lg">
-          {actionLabel}
+          {displayActionLabel}
         </Button>
       )}
     </div>

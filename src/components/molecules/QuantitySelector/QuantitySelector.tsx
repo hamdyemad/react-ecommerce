@@ -22,6 +22,11 @@ export const QuantitySelector: React.FC<QuantitySelectorProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState(value.toString());
 
+  // Sync internal state with external value prop
+  React.useEffect(() => {
+    setInputValue(value.toString());
+  }, [value]);
+
   const handleDecrement = () => {
     const newValue = Math.max(min, value - 1);
     onChange(newValue);

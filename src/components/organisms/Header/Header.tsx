@@ -60,9 +60,15 @@ export function Header({
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 40);
+      const scrollPos = window.scrollY;
+      if (scrollPos > 100) {
+        setIsScrolled(true);
+      } else if (scrollPos < 10) {
+        setIsScrolled(false);
+      }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -144,33 +150,31 @@ export function Header({
   const activeCountry = countries.find(c => c.code === country) || countries[0];
 
   return (
-    <header 
-      className={`sticky top-0 z-[100] transition-all duration-300 w-full ${isScrolled ? 'py-4 px-4 sm:px-6' : 'py-0 px-0'}`}
-    >
-      <div 
-        className={`w-full transition-all duration-300 mx-auto ${
-          isScrolled 
-            ? 'max-w-7xl rounded-[2rem] md:rounded-full shadow-lg border border-opacity-50' 
-            : 'shadow-sm'
-        }`}
-        style={{ 
-          backgroundColor: isScrolled 
-            ? `${tokens.colors[mode].surface.base}E6` // 90% opacity for floating
-            : `${tokens.colors[mode].surface.base}FA`,
-          backdropFilter: 'blur(24px)', 
-          borderColor: tokens.colors[mode].border.DEFAULT,
-          borderBottomWidth: isScrolled ? '0px' : '1px'
-        }}
-      >
+    <header className="sticky top-0 z-[100] w-full">
+      <div className={`transition-all duration-300 w-full ${isScrolled ? 'py-3 px-4 sm:px-6' : 'py-0 px-0'}`}>
         <div 
-          className={`hidden lg:block transition-all duration-300 ${
-            isScrolled ? 'max-h-0 opacity-0 overflow-hidden' : 'max-h-[60px] opacity-100 overflow-visible'
+          className={`w-full transition-all duration-300 mx-auto ${
+            isScrolled 
+              ? 'max-w-7xl rounded-2xl md:rounded-full shadow-2xl border border-white/20' 
+              : 'max-w-none rounded-none shadow-sm'
           }`}
           style={{ 
-            backgroundColor: tokens.colors[mode].background.subtle, 
-            borderBottom: isScrolled ? 'none' : `1px solid ${tokens.colors[mode].border.DEFAULT}` 
+            backgroundColor: tokens.colors[mode].surface.base,
+            backdropFilter: 'blur(20px)', 
+            borderColor: tokens.colors[mode].border.DEFAULT,
+            borderBottomWidth: isScrolled ? '1px' : '0px'
           }}
         >
+          {/* Top Info Bar */}
+          <div 
+            className={`hidden lg:block transition-all duration-300 overflow-hidden ${
+              isScrolled ? 'max-h-0 opacity-0' : 'max-h-[40px] opacity-100'
+            }`}
+            style={{ 
+              backgroundColor: tokens.colors[mode].background.subtle, 
+              borderBottom: isScrolled ? 'none' : `1px solid ${tokens.colors[mode].border.DEFAULT}` 
+            }}
+          >
           <div className={`max-w-7xl mx-auto transition-all duration-300 ${isScrolled ? 'px-4 sm:px-6 lg:px-12' : 'px-6'} py-2.5`}>
           <div className="flex items-center justify-between text-xs font-bold tracking-tight uppercase">
             <div className="flex items-center gap-6" style={{ color: tokens.colors[mode].text.secondary }}>
@@ -274,7 +278,7 @@ export function Header({
       </div>
 
       {/* Main Header */}
-      <div className={`max-w-7xl mx-auto transition-all duration-300 ${isScrolled ? 'px-4 sm:px-6 lg:px-12' : 'px-4 sm:px-6'} py-3 sm:py-5`}>
+      <div className={`max-w-7xl mx-auto transition-all duration-500 ${isScrolled ? 'px-4 sm:px-6 lg:px-12 py-1 sm:py-2' : 'px-4 sm:px-6 py-3 sm:py-5'}`}>
         <div className="flex items-center justify-between gap-2 sm:gap-8">
           <div className="flex items-center gap-3 sm:gap-6">
             <button
@@ -295,12 +299,14 @@ export function Header({
                   ? (language === 'ar' ? logoArWhite : logoEnWhite)
                   : (language === 'ar' ? logoAr : logoEn)}
                 alt="Logo"
-                className="h-[45px] sm:h-[70px] min-w-[100px] sm:min-w-[140px] object-contain rounded-xl"
+                className={`transition-all duration-500 object-contain rounded-xl ${
+                  isScrolled ? 'h-[35px] sm:h-[45px] min-w-[80px] sm:min-w-[100px]' : 'h-[45px] sm:h-[70px] min-w-[100px] sm:min-w-[140px]'
+                }`}
               />
             </Link>
           </div>
 
-          <div className="hidden lg:block flex-1 max-w-2xl relative group" ref={searchDropdownRef}>
+          <div className={`hidden lg:block transition-all duration-500 relative group ${isScrolled ? 'flex-1 max-w-lg' : 'flex-1 max-w-2xl'}`} ref={searchDropdownRef}>
             <input
               type="text"
               placeholder={t('common:searchProducts', 'Search products...')}
@@ -612,9 +618,9 @@ export function Header({
       </div>
 
       {/* Modern Navigation Menu */}
-      <div className="hidden lg:block border-t border-slate-100 dark:border-slate-800">
-        <div className={`max-w-7xl mx-auto transition-all duration-500 ${isScrolled ? 'px-16' : 'px-6'}`}>
-          <nav className="flex items-center w-full gap-2 py-3">
+      <div className={`hidden lg:block transition-all duration-300 overflow-hidden ${isScrolled ? 'max-h-0 opacity-0' : 'max-h-[100px] opacity-100 border-t border-slate-100 dark:border-slate-800'}`}>
+        <div className={`max-w-7xl mx-auto transition-all duration-300 ${isScrolled ? 'px-16' : 'px-6'}`}>
+          <nav className={`flex items-center w-full gap-2 transition-all duration-300 ${isScrolled ? 'py-1' : 'py-3'}`}>
             <Link 
               to="/" 
               style={{ color: tokens.colors[mode].text.primary }}
@@ -674,6 +680,7 @@ export function Header({
             </Link>
           </nav>
         </div>
+      </div>
       </div>
      </div>
     </header>

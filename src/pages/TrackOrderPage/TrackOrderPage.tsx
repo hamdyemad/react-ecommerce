@@ -33,14 +33,22 @@ export function TrackOrderPage() {
       }
       setLoading(true);
       setError(null);
+      
+      // Sanitizing reference (common issue with spaces/hyphens)
+      const sanitizedRef = reference.trim().replace(/\s+/g, '-');
+      
       try {
-        const res = await orderService.trackOrder(reference);
-        if (res.status) {
+        console.log('Tracking order with reference:', sanitizedRef);
+        const res = await orderService.trackOrder(sanitizedRef);
+        console.log('Track Order Response:', res);
+        
+        if (res && res.status) {
           setOrder(res.data);
         } else {
-          setError(res.message || 'Order not found');
+          setError(res?.message || 'Order not found');
         }
       } catch (err: any) {
+        console.error('Track Order Error:', err);
         setError(err.response?.data?.message || 'Failed to fetch order details');
       } finally {
         setLoading(false);
@@ -53,7 +61,9 @@ export function TrackOrderPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchInput.trim()) {
-      navigate(`/track-order/${searchInput.trim()}`);
+      // Ensure we navigate to the sanitized URL
+      const cleanInput = searchInput.trim().replace(/\s+/g, '-');
+      navigate(`/track-order/${cleanInput}`);
     }
   };
 

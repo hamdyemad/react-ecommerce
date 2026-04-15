@@ -1,3 +1,4 @@
+import { cn } from '@/utils/cn';
 import { Button } from '../../atoms/Button';
 import { CartItem } from '../../molecules/CartItem';
 import { PriceBreakdown } from '../../molecules/PriceBreakdown';
@@ -35,7 +36,8 @@ export function CartDrawer({
   onCheckout,
   isLoading,
 }: CartDrawerProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
 
   if (items.length === 0) {
     return (
@@ -52,14 +54,14 @@ export function CartDrawer({
           className="w-full max-w-md h-full overflow-y-auto"
           style={{
             background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
-            boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.2)',
-            animation: 'slideInRight 0.3s ease-out'
+            boxShadow: isRTL ? '4px 0 24px rgba(0, 0, 0, 0.2)' : '-4px 0 24px rgba(0, 0, 0, 0.2)',
+            animation: isRTL ? 'slideInLeft 0.3s ease-out' : 'slideInRight 0.3s ease-out'
           }}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+              <h2 className={cn("text-xl sm:text-2xl font-black text-slate-900", isRTL && "font-cairo")}>
                 {t('shoppingCart')}
               </h2>
               <button
@@ -97,15 +99,15 @@ export function CartDrawer({
         className="w-full max-w-md h-full overflow-y-auto flex flex-col"
         style={{
           background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
-          boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.2)',
-          animation: 'slideInRight 0.3s ease-out'
+          boxShadow: isRTL ? '4px 0 24px rgba(0, 0, 0, 0.2)' : '-4px 0 24px rgba(0, 0, 0, 0.2)',
+          animation: isRTL ? 'slideInLeft 0.3s ease-out' : 'slideInRight 0.3s ease-out'
         }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900">
+            <h2 className={cn("text-xl sm:text-2xl font-black text-slate-900", isRTL && "font-cairo")}>
               {t('shoppingCart')} ({items.length})
             </h2>
             <button

@@ -219,7 +219,7 @@ export function BlogDetailPage() {
                 >
                   <div className="flex items-start gap-5 mb-6">
                     <img 
-                      src={comment.customer.image || 'https://via.placeholder.com/60'} 
+                      src={comment.customer.image || 'https://placehold.co/60'} 
                       alt={comment.customer.full_name}
                       className="w-14 h-14 rounded-2xl object-cover shadow-lg"
                     />

@@ -2,7 +2,8 @@ import React from 'react';
 import { cn } from '@/utils/cn';
 import { QuantitySelector } from '@/components/molecules/QuantitySelector';
 import { Price } from '@/components/molecules/Price';
-import { useDirection } from '@/hooks/useDirection';
+import { CurrencyDisplay } from '@/components/atoms/CurrencyDisplay';
+import { ProductThumbnail } from '../ProductThumbnail';
 
 export interface CartItemProps {
   id: string;
@@ -34,8 +35,6 @@ export const CartItem: React.FC<CartItemProps> = ({
   className,
 }) => {
   const totalPrice = price * quantity;
-  const { selectedCountry } = useDirection();
-  const currency = selectedCountry?.currency;
 
   return (
     <div
@@ -46,16 +45,13 @@ export const CartItem: React.FC<CartItemProps> = ({
         className
       )}
     >
-      {/* Image and Loading Overlay */}
+      {/* Image Container with 3D Support */}
       <div className="flex-shrink-0 relative">
-        <img
-          src={image}
-          alt={title}
-          className={cn(
-            "w-16 h-16 sm:w-24 sm:h-24 object-cover rounded-lg bg-secondary-50 shadow-sm transition-opacity duration-300",
-            loading && "opacity-30"
-          )}
-          loading="lazy"
+        <ProductThumbnail 
+          image={image} 
+          name={title} 
+          size="md"
+          className={cn(loading && "opacity-30")} 
         />
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -117,14 +113,7 @@ export const CartItem: React.FC<CartItemProps> = ({
             <Price amount={totalPrice} size="md" />
             {quantity > 1 && (
               <p className="text-xs text-text-tertiary mt-0.5 flex items-center justify-end gap-0.5">
-                {price.toFixed(2)}
-                {currency && (
-                  currency.use_image && currency.image ? (
-                    <img src={currency.image} alt={currency.code} className="w-3 h-3 object-contain" />
-                  ) : (
-                    <span className="font-bold">{currency.code}</span>
-                  )
-                )}
+                <CurrencyDisplay amount={price} size="sm" />
                 {' each'}
               </p>
             )}

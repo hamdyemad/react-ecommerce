@@ -1,13 +1,14 @@
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../hooks/useTheme';
 import { BreadCrumb } from '../../components/molecules/BreadCrumb';
-import { useState, useEffect } from 'react';
 import { CurrencyDisplay } from '../../components/atoms/CurrencyDisplay';
-import { useTranslation } from 'react-i18next';
 import { tokens } from '../../tokens';
 import { orderService } from '../../services/orderService';
 import { Invoice } from '../../components/molecules/Invoice/Invoice';
 import { Button } from '../../components/atoms/Button';
 import { toast } from 'react-hot-toast';
+import { ProductThumbnail } from '../../components/molecules/ProductThumbnail';
 
 export function OrdersPage() {
   const { mode } = useTheme();
@@ -29,7 +30,7 @@ export function OrdersPage() {
       total: 790,
       items: 2,
       products: [
-        { name: 'Product 1', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop' },
+        { name: 'Product 1', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop', product: { image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop', name: 'Product 1' } },
       ]
     }
   ];
@@ -191,7 +192,11 @@ export function OrdersPage() {
                <div className="space-y-6">
                  {selectedOrder.products?.map((item: any) => (
                     <div key={item.id} className="flex items-center gap-6 p-6 rounded-3xl bg-black/5">
-                       <img src={item.product?.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100'} className="w-20 h-20 rounded-2xl object-cover" />
+                       <ProductThumbnail 
+                          image={item.product?.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100'} 
+                          name={item.product?.name || ''}
+                          size="sm"
+                       />
                        <div className="flex-1">
                          <p className="font-bold text-lg">{item.product?.name}</p>
                          <p className="opacity-60">{item.quantity} x {item.price} {t('egp')}</p>

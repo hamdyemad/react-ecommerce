@@ -265,7 +265,31 @@ export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedP
       }
     } catch (err: any) {
       console.error('Order Error:', err);
-      toast.error(err.response?.data?.message || t('common:orderFailed', 'Failed to place order'));
+      const serverErrors = err.response?.data?.errors;
+      if (serverErrors) {
+        const mappedErrors: Record<string, string> = {};
+        Object.keys(serverErrors).forEach(key => {
+          const message = serverErrors[key][0];
+          // Map server keys to UI fields
+          if (key === 'guest_first_name' || key === 'guest_last_name' || key === 'first_name' || key === 'last_name') {
+            mappedErrors.fullName = message;
+          } else if (key === 'guest_email' || key === 'email') {
+            mappedErrors.email = message;
+          } else if (key === 'guest_phone' || key === 'phone') {
+            mappedErrors.phone = message;
+          } else if (key === 'guest_city_id' || key === 'city_id') {
+            mappedErrors.cityId = message;
+          } else if (key === 'address') {
+            mappedErrors.address = message;
+          } else {
+            mappedErrors[key] = message;
+          }
+        });
+        setErrors(mappedErrors);
+        toast.error(err.response?.data?.message || t('common:fillRequiredFields'));
+      } else {
+        toast.error(err.response?.data?.message || t('common:orderFailed', 'Failed to place order'));
+      }
     } finally {
       setLoading(false);
     }
@@ -289,26 +313,26 @@ export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedP
 
       <div className="max-w-7xl mx-auto px-6 mt-8">
         <h1 
-          className="text-6xl font-black mb-12"
+          className="text-3xl sm:text-4xl md:text-6xl font-black mb-6 md:mb-12"
           style={{ color: tokens.colors[mode].text.primary }}
         >
           {t('common:checkout', 'Checkout')}
         </h1>
 
-        <div className="grid lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-8 space-y-8">
+        <div className="grid lg:grid-cols-12 gap-6 md:gap-12">
+          <div className="lg:col-span-8 space-y-6 md:space-y-8">
             <div 
-              className="p-10 rounded-[45px] shadow-2xl relative group z-20"
+              className="p-6 md:p-10 rounded-[30px] md:rounded-[45px] shadow-2xl relative group z-20"
               style={{
                 background: tokens.colors[mode].surface.elevated,
                 border: `1px solid ${tokens.colors[mode].border.DEFAULT}`,
               }}
             >
-              <div className="flex items-center gap-4 mb-10">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-2xl">
+              <div className="flex items-center gap-3 md:gap-4 mb-6 md:mb-10">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center text-xl md:text-2xl">
                   📍
                 </div>
-                <h2 className="text-3xl font-black" style={{ color: tokens.colors[mode].text.primary }}>
+                <h2 className="text-xl md:text-3xl font-black" style={{ color: tokens.colors[mode].text.primary }}>
                   {t('common:shippingInformation', 'Shipping Information')}
                 </h2>
               </div>
@@ -437,17 +461,17 @@ export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedP
             </div>
 
             <div 
-              className="p-10 rounded-[45px] shadow-2xl relative group z-10"
+              className="p-6 md:p-10 rounded-[30px] md:rounded-[45px] shadow-2xl relative group z-10"
               style={{
                 background: tokens.colors[mode].surface.elevated,
                 border: `1px solid ${tokens.colors[mode].border.DEFAULT}`,
               }}
             >
-              <div className="flex items-center gap-4 mb-10">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-2xl">
+              <div className="flex items-center gap-3 md:gap-4 mb-6 md:mb-10">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-emerald-500/10 flex items-center justify-center text-xl md:text-2xl">
                   💳
                 </div>
-                <h2 className="text-3xl font-black" style={{ color: tokens.colors[mode].text.primary }}>
+                <h2 className="text-xl md:text-3xl font-black" style={{ color: tokens.colors[mode].text.primary }}>
                   {t('common:paymentMethod', 'Payment Method')}
                 </h2>
               </div>

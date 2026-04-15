@@ -28,119 +28,53 @@ export function WishlistPage({ onAddToCart, onToggleWishlist, wishlistItems }: W
   }
 
   return (
-    <div className="min-h-screen py-8">
-      <BreadCrumb 
-        items={[
-          { label: t('home'), path: '/' },
-          { label: t('myWishlist'), path: '/wishlist' }
-        ]}
-      />
+    <div className="min-h-screen py-6 sm:py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <BreadCrumb 
+          items={[
+            { label: t('home'), path: '/' },
+            { label: t('myWishlist'), path: '/wishlist' }
+          ]}
+        />
 
-      {/* Hero Section */}
-      <div className="text-center mb-16 relative py-12">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-        <div className="text-7xl mb-6 relative z-10 animate-bounce">❤️</div>
-        <h1 
-          className="text-6xl font-black mb-4 relative z-10"
-          style={{ color: tokens.colors[mode].text.primary }}
-        >
-          {t('myWishlist')}
-        </h1>
-        <p 
-          className="text-2xl font-bold opacity-70"
-          style={{ color: tokens.colors[mode].text.secondary }}
-        >
-          {wishlist.length} {wishlist.length === 1 ? t('item') : t('items')} {t('savedForLater')}
-        </p>
-      </div>
+        {/* Improved Page Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 mt-6 sm:mt-10">
+          <div className="relative">
+            <div className="absolute -top-6 -left-6 w-16 h-16 bg-primary/10 rounded-full blur-2xl animate-pulse" />
+            <h1 
+              className="text-4xl sm:text-5xl font-black mb-2 relative z-10 flex items-center gap-4"
+              style={{ color: tokens.colors[mode].text.primary }}
+            >
+              <span className="text-3xl sm:text-4xl">❤️</span>
+              {t('myWishlist')}
+            </h1>
+            <p 
+              className="text-lg sm:text-xl font-bold opacity-60 ml-1"
+              style={{ color: tokens.colors[mode].text.secondary }}
+            >
+              {wishlist.length} {wishlist.length === 1 ? t('item') : t('items')} {t('savedForLater')}
+            </p>
+          </div>
 
-      {/* Wishlist Content */}
-      {wishlist.length === 0 ? (
-        /* Empty State */
-        <div 
-          className="text-center py-24 rounded-[50px] shadow-2xl relative overflow-hidden"
-          style={{
-            background: tokens.colors[mode].surface.elevated,
-            backdropFilter: 'blur(30px)',
-            border: `1px solid ${tokens.colors[mode].border.DEFAULT}`,
-          }}
-        >
-          <div className="absolute top-0 left-0 w-64 h-64 bg-red-500/5 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2" />
-          <div className="text-9xl mb-8 opacity-30">💔</div>
-          <h2 
-            className="text-4xl font-black mb-6"
-            style={{ color: tokens.colors[mode].text.primary }}
-          >
-            {t('wishlistEmpty')}
-          </h2>
-          <p 
-            className="text-xl mb-12 opacity-60 font-bold max-w-lg mx-auto"
-            style={{ color: tokens.colors[mode].text.secondary }}
-          >
-            {t('startAddingProducts')}
-          </p>
-          <Button
-            variant="primary"
-            size="lg"
-            className="rounded-2xl font-black px-12 py-5 text-xl shadow-xl hover:scale-110 active:scale-95 transition-all"
-            onClick={() => navigate('/categories')}
-            style={{ background: tokens.gradients.primary }}
-          >
-            {t('startShopping')} 🛍️
-          </Button>
-        </div>
-      ) : (
-        <>
-          {/* Action Bar */}
-          <div 
-            className="flex flex-col md:flex-row items-center justify-between p-8 rounded-[35px] mb-12 shadow-xl"
-            style={{
-              background: tokens.colors[mode].surface.elevated,
-              backdropFilter: 'blur(30px)',
-              border: `1px solid ${tokens.colors[mode].border.DEFAULT}`,
-            }}
-          >
-            <div className="mb-6 md:mb-0 text-center md:text-left">
-              <h3 
-                className="text-4xl font-black mb-1"
-                style={{ color: tokens.colors[mode].text.primary }}
-              >
-                {wishlist.length} {wishlist.length === 1 ? t('product', 'Product') : t('products', 'Products')}
-              </h3>
-              <p 
-                className="text-lg font-bold opacity-70 uppercase tracking-widest"
-                style={{ color: tokens.colors[mode].text.secondary }}
-              >
-                {wishlist.filter(p => p.remaining_stock > 0).length} {t('inStock')}
-              </p>
-            </div>
-            <div className="flex flex-wrap justify-center gap-4">
+          {wishlist.length > 0 && (
+            <div className="flex flex-wrap gap-3">
               <Button
                 variant="destructive"
-                size="lg"
-                className="rounded-2xl font-black px-8 shadow-xl"
+                size="md"
+                className="rounded-xl font-black px-6 py-3 shadow-lg shadow-red-500/10 hover:scale-105 transition-all text-sm uppercase tracking-wide"
                 onClick={clearWishlist}
               >
                 {t('clearAll')} 🗑️
               </Button>
               <Button
-                variant="secondary"
-                size="lg"
-                className="rounded-2xl font-black px-8 shadow-xl"
-                style={{ background: tokens.gradients.secondary }}
-                onClick={() => console.log('Share wishlist')}
-              >
-                {t('share')} 📤
-              </Button>
-              <Button
                 variant="primary"
-                size="lg"
-                className="rounded-2xl font-black px-10 shadow-xl"
+                size="md"
+                className="rounded-xl font-black px-8 py-3 shadow-lg shadow-primary/20 hover:scale-105 transition-all text-sm uppercase tracking-wide"
                 style={{ background: tokens.gradients.primary }}
                 onClick={() => {
                   wishlist.forEach(product => {
                     if (product.remaining_stock > 0) {
-                      onAddToCart(product.id);
+                      onAddToCart(product.id as any);
                     }
                   });
                 }}
@@ -148,10 +82,46 @@ export function WishlistPage({ onAddToCart, onToggleWishlist, wishlistItems }: W
                 {t('addAllToCart')} 🛒
               </Button>
             </div>
-          </div>
+          )}
+        </div>
 
-          {/* Products Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        {/* Wishlist Content */}
+        {wishlist.length === 0 ? (
+          /* Refined Empty State */
+          <div 
+            className="text-center py-20 sm:py-32 rounded-[30px] sm:rounded-[40px] shadow-xl relative overflow-hidden"
+            style={{
+              background: tokens.colors[mode].surface.elevated,
+              backdropFilter: 'blur(30px)',
+              border: `1px solid ${tokens.colors[mode].border.DEFAULT}`,
+            }}
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] translate-x-1/2 -translate-y-1/2" />
+            <div className="text-8xl mb-6 grayscale opacity-20">🛒</div>
+            <h2 
+              className="text-3xl sm:text-4xl font-black mb-4"
+              style={{ color: tokens.colors[mode].text.primary }}
+            >
+              {t('wishlistEmpty')}
+            </h2>
+            <p 
+              className="text-lg mb-10 opacity-60 font-medium max-w-md mx-auto px-6"
+              style={{ color: tokens.colors[mode].text.secondary }}
+            >
+              {t('startAddingProducts')}
+            </p>
+            <Button
+              variant="primary"
+              size="lg"
+              className="rounded-xl font-black px-10 py-4 shadow-xl hover:scale-105 active:scale-95 transition-all"
+              onClick={() => navigate('/products')}
+              style={{ background: tokens.gradients.primary }}
+            >
+              {t('startShopping')} 🛍️
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8 animate-fadeInScale">
             {wishlist.map((product) => (
               <div key={product.id} className="relative group/item">
                 <ProductCard
@@ -168,51 +138,25 @@ export function WishlistPage({ onAddToCart, onToggleWishlist, wishlistItems }: W
                   category={product.category}
                   sub_category={product.sub_category}
                   remaining_stock={product.remaining_stock}
-                  onAddToCart={onAddToCart}
-                  onToggleWishlist={onToggleWishlist}
+                  onAddToCart={onAddToCart as any}
+                  onToggleWishlist={onToggleWishlist as any}
                   isInWishlist={wishlistItems.includes(product.id)}
                 />
+                
                 {product.remaining_stock <= 0 && (
                   <div 
-                    className="absolute inset-0 rounded-[2rem] flex items-center justify-center p-6"
-                    style={{
-                      background: 'rgba(0, 0, 0, 0.4)',
-                      backdropFilter: 'blur(8px)',
-                      zIndex: 20
-                    }}
+                    className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-md rounded-b-[2rem] p-3 text-center border-t border-white/10"
+                    style={{ zIndex: 10 }}
                   >
-                    <div className="text-center transform transition-transform group-hover/item:scale-110">
-                      <div className="text-5xl mb-4 bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto backdrop-blur-md">😔</div>
-                      <p className="text-white font-black text-2xl mb-2 tracking-tight">{t('outOfStock')}</p>
-                      <button className="text-white/90 text-sm font-black underline underline-offset-4 hover:text-white transition-colors">
-                        {t('notifyMe')}
-                      </button>
-                    </div>
+                    <p className="text-white font-black text-sm uppercase tracking-widest">{t('outOfStock')}</p>
                   </div>
                 )}
               </div>
             ))}
           </div>
+        )}
 
-          {/* Recommendations */}
-          <div className="mt-24 pt-16 border-t border-dashed" style={{ borderColor: tokens.colors[mode].border.DEFAULT }}>
-            <div className="text-center mb-12">
-              <h2 
-                className="text-5xl font-black mb-4"
-                style={{ color: tokens.colors[mode].text.primary }}
-              >
-                {t('youMightAlsoLike')}
-              </h2>
-              <p 
-                className="text-xl font-bold opacity-60"
-                style={{ color: tokens.colors[mode].text.secondary }}
-              >
-                Based on your wishlist preferences
-              </p>
-            </div>
-          </div>
-        </>
-      )}
+      </div>
     </div>
   );
 }

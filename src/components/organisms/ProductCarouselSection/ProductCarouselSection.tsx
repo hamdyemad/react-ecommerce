@@ -217,6 +217,7 @@ export function ProductCarouselSection({
                           category={product.category}
                           sub_category={product.sub_category}
                           remaining_stock={product.remaining_stock}
+                          model_3d={(product as any).model_3d}
                           showAddToCart={false}
                         />
                       </div>
