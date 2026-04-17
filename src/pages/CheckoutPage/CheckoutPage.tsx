@@ -24,9 +24,10 @@ interface CheckoutPageProps {
   appliedPromo?: any;
   setAppliedPromo: (promo: any) => void;
   onOrderSuccess: () => void;
+  isCartLoading?: boolean;
 }
 
-export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedPromo, onOrderSuccess }: CheckoutPageProps) {
+export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedPromo, onOrderSuccess, isCartLoading = false }: CheckoutPageProps) {
   const { mode } = useTheme();
   const { t, i18n } = useTranslation();
   const { selectedCountry } = useDirection();
@@ -42,7 +43,8 @@ export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedP
   const [userAddresses, setUserAddresses] = useState<Address[]>([]);
 
   const [formData, setFormData] = useState({
-    fullName: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
     cityId: '',
@@ -60,12 +62,13 @@ export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedP
   useEffect(() => {
     if (isAuthenticated && user) {
       // Logic fix for 'full_name' vs 'first_name/last_name'
-      const displayName = (user as any).full_name || 
-                         ((user as any).first_name ? `${(user as any).first_name} ${(user as any).last_name || ''}` : '');
+      const fName = (user as any).first_name || ((user as any).full_name ? (user as any).full_name.split(' ')[0] : '');
+      const lName = (user as any).last_name || ((user as any).full_name ? (user as any).full_name.split(' ').slice(1).join(' ') : '');
       
       setFormData(prev => ({
         ...prev,
-        fullName: displayName,
+        firstName: fName,
+        lastName: lName,
         email: user.email || '',
         phone: user.phone || '',
       }));
@@ -164,7 +167,8 @@ export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedP
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.fullName) newErrors.fullName = t('requiredField', 'This field is required');
+    if (!formData.firstName) newErrors.firstName = t('requiredField', 'This field is required');
+    if (!formData.lastName) newErrors.lastName = t('requiredField', 'This field is required');
     if (!formData.email) newErrors.email = t('requiredField', 'This field is required');
     if (!formData.phone) newErrors.phone = t('requiredField', 'This field is required');
     if (!formData.cityId) newErrors.cityId = t('requiredField', 'This field is required');
@@ -186,6 +190,7 @@ export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedP
   const handlePlaceOrder = async () => {
     if (!validate()) {
       toast.error(t('common:fillRequiredFields', 'Please fill all required fields'));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
@@ -218,9 +223,8 @@ export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedP
         }
       }
 
-      const nameParts = formData.fullName.trim().split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : ' ';
+      const firstName = formData.firstName.trim();
+      const lastName = formData.lastName.trim();
 
       const payload: any = {
         is_guest: !isAuthenticated,
@@ -271,8 +275,10 @@ export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedP
         Object.keys(serverErrors).forEach(key => {
           const message = serverErrors[key][0];
           // Map server keys to UI fields
-          if (key === 'guest_first_name' || key === 'guest_last_name' || key === 'first_name' || key === 'last_name') {
-            mappedErrors.fullName = message;
+          if (key === 'guest_first_name' || key === 'first_name') {
+            mappedErrors.firstName = message;
+          } else if (key === 'guest_last_name' || key === 'last_name') {
+            mappedErrors.lastName = message;
           } else if (key === 'guest_email' || key === 'email') {
             mappedErrors.email = message;
           } else if (key === 'guest_phone' || key === 'phone') {
@@ -287,13 +293,23 @@ export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedP
         });
         setErrors(mappedErrors);
         toast.error(err.response?.data?.message || t('common:fillRequiredFields'));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         toast.error(err.response?.data?.message || t('common:orderFailed', 'Failed to place order'));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } finally {
       setLoading(false);
     }
   };
+
+  if (isCartLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (items.length === 0 && !showSuccess) {
     navigate('/cart');
@@ -328,7 +344,7 @@ export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedP
                 border: `1px solid ${tokens.colors[mode].border.DEFAULT}`,
               }}
             >
-              <div className="flex items-center gap-3 md:gap-4 mb-6 md:mb-10">
+              <div className="flex items-center gap-3 md:gap-4 mb-6 md:mb-8">
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center text-xl md:text-2xl">
                   📍
                 </div>
@@ -339,9 +355,9 @@ export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedP
 
               {/* Saved Addresses Section for Auth Users */}
               {isAuthenticated && userAddresses.length > 0 && (
-                <div className="mb-12">
+                <div className="mb-8">
                   <h3 
-                    className="text-sm font-black uppercase tracking-widest mb-6 opacity-60 flex items-center gap-2"
+                    className="text-sm font-black uppercase tracking-widest mb-4 opacity-60 flex items-center gap-2"
                     style={{ color: tokens.colors[mode].text.primary }}
                   >
                     🏠 {t('common:chooseSavedAddress', 'Choose from Saved Addresses')}
@@ -358,7 +374,7 @@ export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedP
                             : 'border-slate-100 dark:border-slate-800 hover:border-primary/30'
                         }`}
                       >
-                        <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2 mb-3">
                           <span className="font-black text-lg" style={{ color: tokens.colors[mode].text.primary }}>
                             {addr.title}
                           </span>
@@ -383,18 +399,27 @@ export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedP
                       </button>
                     ))}
                   </div>
-                  <div className="mt-8 pt-8 border-t border-dashed" style={{ borderColor: tokens.colors[mode].border.DEFAULT }} />
+                  <div className="mt-6 pt-6 border-t border-dashed" style={{ borderColor: tokens.colors[mode].border.DEFAULT }} />
                 </div>
               )}
 
               <div className="grid md:grid-cols-2 gap-8">
                 <FormInput
-                  label={t('common:fullName', 'Full Name')}
-                  name="fullName"
-                  value={formData.fullName}
+                  label={t('common:firstName', 'First Name')}
+                  name="firstName"
+                  value={formData.firstName}
                   onChange={handleInputChange}
-                  placeholder={t('common:fullName', 'Full Name')}
-                  error={errors.fullName}
+                  placeholder={t('common:firstName', 'First Name')}
+                  error={errors.firstName}
+                  required
+                />
+                <FormInput
+                  label={t('common:lastName', 'Last Name')}
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleInputChange}
+                  placeholder={t('common:lastName', 'Last Name')}
+                  error={errors.lastName}
                   required
                 />
                 <FormInput
@@ -424,10 +449,9 @@ export function CheckoutPage({ items, subtotal, total, appliedPromo, setAppliedP
                   leftElement={
                     selectedCountry && (
                       <div
-                        className="font-black px-4 h-full flex items-center justify-center text-sm"
+                        className="font-black h-full flex items-center justify-center text-sm"
                         style={{
                           color: tokens.colors[mode].text.tertiary,
-                          borderRight: `1px solid ${tokens.colors[mode].border.DEFAULT}`,
                         }}
                       >
                         {selectedCountry.phone_code}

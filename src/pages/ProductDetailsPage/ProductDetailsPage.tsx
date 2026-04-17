@@ -788,6 +788,7 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
                 </div>
                 
                 <div className="flex-1 flex gap-2 sm:gap-3">
+                {mainVendorProduct.department.slug !== 'construction-chemicals' && (
                   <button
                     onClick={handleAddToCart}
                     disabled={currentStock <= 0 || isLoading}
@@ -800,6 +801,7 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
                       <span>🛒 {t('common:addToCart', 'Add to Cart')}</span>
                     )}
                   </button>
+                )}
 
 
                    <button
@@ -849,18 +851,22 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
 
         {tabs.length > 0 && (
           <div className="mb-12 sm:mb-20">
-            <div className="flex gap-2 sm:gap-4 mb-6 sm:mb-8 border-b border-slate-200 dark:border-slate-800 overflow-x-auto no-scrollbar pb-0.5">
+            <div className="flex gap-2 sm:gap-4 mb-6 sm:mb-10 border-b-2 border-slate-100 dark:border-slate-800/50 overflow-x-auto no-scrollbar pb-0">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 sm:px-8 py-3 sm:py-5 font-black text-xs sm:text-sm uppercase tracking-wider sm:tracking-widest transition-all relative whitespace-nowrap ${activeTab === tab.id ? 'text-primary' : 'text-slate-400'}`}
+                  className={`px-6 sm:px-10 py-4 sm:py-6 font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] transition-all relative whitespace-nowrap ${activeTab === tab.id ? 'text-primary opacity-100' : 'text-slate-400 opacity-60 hover:opacity-100'}`}
                 >
-                  {t(`common:${tab.id}`)}
+                  <span className="flex items-center gap-2">
+                    <span className="text-base sm:text-lg">{tab.icon}</span>
+                    {t(`common:${tab.id}`)}
+                  </span>
                   {activeTab === tab.id && (
                     <motion.div 
                       layoutId="activeTabUnderline"
-                      className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-full shadow-[0_-4px_10px_rgba(99,102,241,0.5)] z-10"
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-full z-10"
+                      style={{ boxShadow: '0 -4px 12px var(--color-primary-DEFAULT)' }}
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}
@@ -869,17 +875,27 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
             </div>
 
             <div 
-              className="p-5 sm:p-10 rounded-[20px] sm:rounded-[40px] border shadow-2xl relative overflow-hidden min-h-[200px]"
+              className="p-8 sm:p-14 rounded-[35px] sm:rounded-[50px] border shadow-2xl relative overflow-hidden min-h-[300px] transition-all duration-500"
               style={{
-                background: tokens.colors[mode].surface.base,
-                borderColor: tokens.colors[mode].border.DEFAULT
+                background: mode === 'light' 
+                  ? 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.8) 100%)'
+                  : 'linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.8) 100%)',
+                backdropFilter: 'blur(20px)',
+                borderColor: tokens.colors[mode].border.DEFAULT,
+                boxShadow: mode === 'light' 
+                  ? '0 30px 60px -12px rgba(0, 0, 0, 0.08)' 
+                  : '0 30px 60px -12px rgba(0, 0, 0, 0.4)'
               }}
             >
-              <div className="absolute top-0 right-0 p-8 text-8xl grayscale opacity-10 dark:opacity-5 pointer-events-none select-none">
+              {/* Decorative Background Icon */}
+              <div 
+                className="absolute -top-10 -right-10 text-[20rem] opacity-[0.03] dark:opacity-[0.02] pointer-events-none select-none transition-all duration-700"
+                style={{ transform: 'rotate(-15deg)' }}
+              >
                 {tabs.find(t => t.id === activeTab)?.icon}
               </div>
               
-              <div className="relative z-10">
+              <div className="relative z-10 animate-fadeIn">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeTab}

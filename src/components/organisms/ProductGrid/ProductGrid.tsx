@@ -58,6 +58,7 @@ export function ProductGrid({
               review_avg_star={rating}
               reviews_count={product.reviews_count}
               remaining_stock={product.remaining_stock || product.stock}
+              department={product.department}
               onAddToCart={onAddToCart}
               onToggleWishlist={onToggleWishlist}
               isInWishlist={wishlistItems.includes(product.id)}

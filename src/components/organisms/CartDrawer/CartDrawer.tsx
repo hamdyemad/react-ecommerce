@@ -51,9 +51,8 @@ export function CartDrawer({
         onClick={onClose}
       >
         <div 
-          className="w-full max-w-md h-full overflow-y-auto"
+          className="w-full max-w-md h-full overflow-y-auto bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800"
           style={{
-            background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
             boxShadow: isRTL ? '4px 0 24px rgba(0, 0, 0, 0.2)' : '-4px 0 24px rgba(0, 0, 0, 0.2)',
             animation: isRTL ? 'slideInLeft 0.3s ease-out' : 'slideInRight 0.3s ease-out'
           }}
@@ -61,16 +60,12 @@ export function CartDrawer({
         >
           <div className="p-4 sm:p-6">
             <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <h2 className={cn("text-xl sm:text-2xl font-black text-slate-900", isRTL && "font-cairo")}>
+              <h2 className={cn("text-xl sm:text-2xl font-black text-slate-900 dark:text-white", isRTL && "font-cairo")}>
                 {t('shoppingCart')}
               </h2>
               <button
                 onClick={onClose}
-                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
-                style={{
-                  background: '#f1f5f9',
-                  color: '#0f172a'
-                }}
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
                 aria-label="Close cart"
               >
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,9 +91,8 @@ export function CartDrawer({
       onClick={onClose}
     >
       <div 
-        className="w-full max-w-md h-full overflow-y-auto flex flex-col"
+        className="w-full max-w-md h-full overflow-y-auto flex flex-col bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800"
         style={{
-          background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
           boxShadow: isRTL ? '4px 0 24px rgba(0, 0, 0, 0.2)' : '-4px 0 24px rgba(0, 0, 0, 0.2)',
           animation: isRTL ? 'slideInLeft 0.3s ease-out' : 'slideInRight 0.3s ease-out'
         }}
@@ -107,16 +101,12 @@ export function CartDrawer({
         <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h2 className={cn("text-xl sm:text-2xl font-black text-slate-900", isRTL && "font-cairo")}>
+            <h2 className={cn("text-xl sm:text-2xl font-black text-slate-900 dark:text-white", isRTL && "font-cairo")}>
               {t('shoppingCart')} ({items.length})
             </h2>
             <button
               onClick={onClose}
-              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 flex-shrink-0"
-              style={{
-                background: '#f1f5f9',
-                color: '#0f172a'
-              }}
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 flex-shrink-0 bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
               aria-label="Close cart"
             >
               <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,31 +131,24 @@ export function CartDrawer({
         </div>
 
         {/* Floating Bottom Section */}
-        <div className="p-4 sm:p-6 bg-white border-t border-slate-100 shadow-[0_-4px_16px_rgba(0,0,0,0.05)]">
+        <div className="p-4 sm:p-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 shadow-[0_-4px_16px_rgba(0,0,0,0.05)] dark:shadow-[0_-4px_16px_rgba(0,0,0,0.5)]">
           {/* View Full Cart Link */}
           <Link
             to="/cart"
             onClick={onClose}
-            className="block w-full py-2.5 sm:py-3 px-4 rounded-xl font-bold text-center mb-3 sm:mb-4 transition-all duration-300 hover:scale-[1.02] active:scale-95 text-sm sm:text-base"
-            style={{
-              background: '#f1f5f9',
-              color: '#0f172a',
-              border: '2px solid #e2e8f0'
-            }}
+            className="block w-full py-2.5 sm:py-3 px-4 rounded-xl font-bold text-center mb-3 sm:mb-4 transition-all duration-300 hover:scale-[1.02] active:scale-95 text-sm sm:text-base border-2 border-slate-200 bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 dark:hover:bg-slate-700"
           >
             📋 {t('viewFullCart', 'View Full Cart')}
           </Link>
 
           {/* Price Breakdown */}
           <div 
-            className="p-3 sm:p-5 rounded-2xl mb-3 sm:mb-4"
-            style={{
-              background: 'rgba(248, 250, 252, 0.8)',
-              border: '1px solid #e2e8f0'
-            }}
+            className="p-3 sm:p-5 rounded-2xl mb-3 sm:mb-4 bg-slate-50/80 border border-slate-200 dark:bg-slate-800/80 dark:border-slate-700"
           >
             <PriceBreakdown
               subtotal={subtotal}
+              discount={Math.max(0, subtotal - total)}
+              tax={Math.max(0, total - subtotal)}
               total={total}
             />
           </div>

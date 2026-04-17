@@ -102,7 +102,7 @@ export function Select({
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "w-full px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between text-left",
+          "w-full px-4 py-3 sm:px-5 sm:py-4 rounded-xl sm:rounded-2xl font-medium transition-all flex items-center justify-between text-left",
           "bg-[var(--color-surface-base)]",
           error ? "border border-red-500" : "border border-[var(--color-border-DEFAULT)]",
           selectedOption ? "text-[var(--color-text-primary)]" : "text-[var(--color-text-tertiary)]",

@@ -178,7 +178,7 @@ export function RegisterPage() {
   ) : undefined;
 
   return (
-    <div className="min-h-screen py-16 flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen py-8 sm:py-16 flex items-center justify-center relative overflow-hidden">
       <SEO title={t('register', 'Register')} />
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
@@ -192,7 +192,7 @@ export function RegisterPage() {
             ✨
           </div>
           <h1
-            className="text-6xl font-black mb-4 pb-2"
+            className="text-3xl sm:text-6xl font-black mb-3 pb-1 sm:mb-4 sm:pb-2"
             style={{
               background: tokens.gradients.primary,
               WebkitBackgroundClip: 'text',
@@ -201,22 +201,22 @@ export function RegisterPage() {
           >
             {t('register:title')}
           </h1>
-          <p className="text-xl font-bold opacity-70" style={{ color: tokens.colors[mode].text.secondary }}>
+          <p className="text-lg sm:text-xl font-bold opacity-70" style={{ color: tokens.colors[mode].text.secondary }}>
             {t('register:subtitle')}
           </p>
         </div>
 
         <div
-          className="rounded-[45px] p-10 md:p-14 transition-all duration-500 shadow-2xl hover:shadow-[0_40px_100px_rgba(0,0,0,0.1)]"
+          className="rounded-[35px] sm:rounded-[45px] p-6 sm:p-10 md:p-14 transition-all duration-500 shadow-2xl hover:shadow-[0_40px_100px_rgba(0,0,0,0.1)]"
           style={{
             background: tokens.colors[mode].surface.elevated,
             backdropFilter: 'blur(30px)',
             border: `1px solid ${tokens.colors[mode].border.DEFAULT}`,
           }}
         >
-          <form onSubmit={handleSubmit} className="space-y-8" noValidate>
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-8" noValidate>
             {/* First & Last Name */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
               <FormInput
                 label={t('firstName')}
                 type="text"
@@ -303,7 +303,7 @@ export function RegisterPage() {
             </div>
 
             {/* City & Region */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
               <Select
                 label={t('city')}
                 name="city_id"
@@ -330,7 +330,7 @@ export function RegisterPage() {
             </div>
 
             {/* Password & Confirm Password */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
               {/* FormInput auto-adds eye icon for type=password */}
               <FormInput
                 label={t('password')}
@@ -391,7 +391,7 @@ export function RegisterPage() {
             <FormButton
               type="submit"
               disabled={!agreeTerms || loading}
-              className="w-full py-5 rounded-2xl font-black text-xl shadow-2xl transition-all duration-500 hover:scale-[1.02] active:scale-95"
+              className="w-full py-4 sm:py-5 rounded-2xl font-black text-lg sm:text-xl shadow-2xl transition-all duration-500 hover:scale-[1.02] active:scale-95"
               style={{
                 background: (!agreeTerms || loading)
                   ? tokens.colors[mode].surface.base

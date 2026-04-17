@@ -29,9 +29,12 @@ export const cartService = {
     return response.data;
   },
 
-  updateQuantity: async (itemId: number, quantity: number): Promise<ApiResponse<any>> => {
-    // Note: If the API uses /cart/update/{itemId} or similar, update here
-    const response = await api.post(`/cart/update/${itemId}`, { quantity });
+  updateQuantity: async (data: { 
+    vendor_product_id: number; 
+    vendor_product_variant_id: number | null; 
+    quantity: number; 
+  }): Promise<ApiResponse<any>> => {
+    const response = await api.post('/cart/add-or-update', { ...data, type: 'product' });
     return response.data;
   },
 

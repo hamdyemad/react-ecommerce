@@ -25,6 +25,19 @@ export function CategoryPage({ onAddToCart, onToggleWishlist, wishlistItems }: C
   const [subcategories, setSubcategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingSubs, setLoadingSubs] = useState(false);
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 768) setScreenSize('mobile');
+      else if (width < 1024) setScreenSize('tablet');
+      else setScreenSize('desktop');
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -159,12 +172,14 @@ export function CategoryPage({ onAddToCart, onToggleWishlist, wishlistItems }: C
           
           <Carousel autoPlay={false} showDots={true} peekAmount={10} variant="standalone">
             {(() => {
+              const itemsPerSlide = screenSize === 'mobile' ? 1 : screenSize === 'tablet' ? 2 : 4;
+              const gridColsClass = screenSize === 'mobile' ? 'grid-cols-1' : screenSize === 'tablet' ? 'grid-cols-2' : 'grid-cols-4';
               const slides = [];
-              for (let i = 0; i < subcategories.length; i += 4) {
-                slides.push(subcategories.slice(i, i + 4));
+              for (let i = 0; i < subcategories.length; i += itemsPerSlide) {
+                slides.push(subcategories.slice(i, i + itemsPerSlide));
               }
               return slides.map((slideSubs, idx) => (
-                <div key={idx} className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 px-2 sm:px-4 py-6 sm:py-10">
+                <div key={idx} className={`grid ${gridColsClass} gap-4 sm:gap-6 px-2 sm:px-4 py-6 sm:py-10`}>
                   {slideSubs.map((sub) => (
                     <Link 
                       key={sub.id}
@@ -172,24 +187,35 @@ export function CategoryPage({ onAddToCart, onToggleWishlist, wishlistItems }: C
                       className="group block"
                     >
                       <div 
-                        className="rounded-[20px] sm:rounded-[35px] p-4 sm:p-6 h-full transition-all duration-500 hover:scale-105 hover:shadow-2xl border flex flex-col items-center text-center gap-3 sm:gap-4"
+                        className="rounded-[20px] sm:rounded-[35px] p-6 sm:p-8 h-full transition-all duration-500 hover:scale-105 hover:shadow-2xl border flex flex-col items-center text-center gap-4 sm:gap-6 group-hover:border-primary/30"
                         style={{
-                          background: mode === 'light' ? tokens.colors.light.surface.base : tokens.colors.dark.surface.base,
+                          background: mode === 'light' 
+                            ? 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' 
+                            : 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
                           borderColor: mode === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)',
+                          boxShadow: mode === 'light' 
+                            ? '0 10px 30px -5px rgba(0, 0, 0, 0.05)' 
+                            : '0 20px 40px -10px rgba(0, 0, 0, 0.4)',
                         }}
                       >
-                        <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-[16px] sm:rounded-[28px] bg-primary/5 flex items-center justify-center p-3 sm:p-4 group-hover:bg-primary/10 transition-colors">
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-[24px] sm:rounded-[30px] flex items-center justify-center p-4 sm:p-6 group-hover:bg-primary/10 transition-all duration-500 group-hover:-rotate-12 group-hover:scale-110 relative"
+                          style={{
+                            background: mode === 'light' ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.02)',
+                            boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.02)'
+                          }}
+                        >
+                          <div className="absolute inset-0 bg-primary/5 rounded-[24px] sm:rounded-[30px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                           {sub.icon ? (
-                            <img src={sub.icon} alt={sub.name} className="w-full h-full object-contain" />
+                            <img src={sub.icon} alt={sub.name} className="w-full h-full object-contain relative z-10" />
                           ) : (
-                            <span className="text-2xl sm:text-3xl">🗂️</span>
+                            <span className="text-4xl sm:text-5xl relative z-10">🗂️</span>
                           )}
                         </div>
-                        <div>
-                          <h4 className="font-black text-xs sm:text-sm truncate w-full max-w-[120px] sm:max-w-[150px]" style={{ color: tokens.colors[mode].text.primary }}>{sub.name}</h4>
-                          <p className="text-[10px] font-bold opacity-50 mt-1" style={{ color: tokens.colors[mode].text.secondary }}>
-                            {sub.products_count} {t('common:products')}
-                          </p>
+                        <div className="flex flex-col items-center">
+                          <h4 className="font-black text-lg sm:text-xl mb-2 truncate w-full max-w-[200px]" style={{ color: tokens.colors[mode].text.primary }}>{sub.name}</h4>
+                          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-[10px] sm:text-[12px] font-black uppercase tracking-widest transition-colors duration-300 group-hover:bg-primary group-hover:text-white">
+                            {sub.products_count || 0} {t('common:products')}
+                          </span>
                         </div>
                       </div>
                     </Link>

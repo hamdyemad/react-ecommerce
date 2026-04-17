@@ -27,7 +27,17 @@ export interface ProductCardProps {
   badge?: string;
   is_fav?: boolean;
   slug: string;
-  onAddToCart?: (id: string | number) => void;
+  onAddToCart?: (data: {
+    vendor_product_id: number;
+    variant_id: number | null;
+    quantity: number;
+    product_data: {
+      id: string;
+      image: string;
+      title: string;
+      price: number;
+    };
+  }) => void;
   onToggleWishlist?: (data: any) => void;
   isInWishlist?: boolean;
   className?: string;
@@ -61,7 +71,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   discount: propDiscount,
   points,
   brand,
-  showAddToCart = true, // Default to true for backward compatibility
+  showAddToCart = false, // Default to false as requested to only show in product details
   department,
   category,
   sub_category,
@@ -453,7 +463,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <button
             onClick={(e) => {
               e.preventDefault();
-              onAddToCart(id);
+              onAddToCart({
+                vendor_product_id: Number(id),
+                variant_id: null,
+                quantity: 1,
+                product_data: {
+                  id: String(id),
+                  image,
+                  title: name,
+                  price: currentPrice || 0,
+                }
+              });
             }}
             className="w-full mt-4 py-3 rounded-xl font-black text-sm transition-all duration-300 transform active:scale-95 shadow-xl hover:shadow-primary/20"
             style={{

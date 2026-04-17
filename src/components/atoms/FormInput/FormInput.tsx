@@ -66,7 +66,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
             making leftElement always appear on the physical left regardless of page RTL. */}
         <div className="relative flex items-center" dir={inputDir}>
           {leftElement && (
-            <div className="absolute start-0 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center h-full">
+            <div className="absolute start-0 top-0 bottom-0 z-10 flex items-center justify-center w-14 border-e border-[var(--color-border-DEFAULT)]">
               {leftElement}
             </div>
           )}
@@ -74,13 +74,13 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
             ref={ref}
             type={resolvedType}
             className={cn(
-              'w-full px-5 py-4 rounded-2xl font-bold text-base transition-all outline-none focus:ring-4 focus:ring-primary/10 focus:border-transparent',
+              'w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base transition-all outline-none focus:ring-4 focus:ring-primary/10 focus:border-transparent',
               'bg-[var(--color-surface-base)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)]',
               error ? 'border-2 border-red-500' : 'border border-[var(--color-border-DEFAULT)]',
-              // Extra start padding when there's a left element
-              leftElement ? 'ps-20' : '',
-              // Extra end padding when there's a right element (eye or custom)
-              resolvedRightElement ? 'pe-12' : '',
+              // Dynamic start padding
+              leftElement ? 'ps-16' : 'ps-4 sm:ps-5',
+              // Dynamic end padding
+              resolvedRightElement ? 'pe-12' : 'pe-4 sm:pe-5',
               className
             )}
             {...props}

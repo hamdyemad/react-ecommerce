@@ -42,6 +42,7 @@ interface ProductCatalogProps {
   hideBrandFilter?: boolean;
   hideCategoryFilter?: boolean;
   hideDepartmentFilter?: boolean;
+  hideAddToCart?: boolean;
   onAddToCart?: (id: string | number) => void;
   onToggleWishlist: (id: string | number) => void;
   wishlistItems: (string | number)[];
@@ -54,6 +55,7 @@ export function ProductCatalog({
   hideBrandFilter = false,
   hideCategoryFilter = false,
   hideDepartmentFilter = false,
+  hideAddToCart = false,
   onAddToCart,
   onToggleWishlist,
   wishlistItems
@@ -754,7 +756,7 @@ export function ProductCatalog({
           </div>
         ) : productsList.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 mb-16">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 mb-6 sm:mb-10">
               {productsList.map((product) => (
                 <ProductCard
                   key={product.id}
@@ -774,25 +776,26 @@ export function ProductCatalog({
                   category={product.category}
                   sub_category={product.sub_category}
                   remaining_stock={product.remaining_stock}
-                  onAddToCart={onAddToCart}
+                  onAddToCart={onAddToCart as any}
                   onToggleWishlist={onToggleWishlist}
                   isInWishlist={wishlistItems.includes(product.id)}
+                  showAddToCart={!hideAddToCart}
                 />
               ))}
             </div>
 
             {/* Infinite Scroll Loader Sentinel */}
-            <div ref={loaderRef} className="py-10 flex justify-center w-full">
+            <div ref={loaderRef} className="py-4 flex justify-center w-full">
               {hasMore && (
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-                  <p className="text-sm font-black opacity-50 uppercase tracking-widest">{t('common:loadingMore', 'Loading more products...')}</p>
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                  <p className="text-xs font-black opacity-50 uppercase tracking-widest">{t('common:loadingMore', 'Loading more products...')}</p>
                 </div>
               )}
               {!hasMore && productsList.length > 0 && (
-                <div className="py-8 text-center w-full opacity-40">
-                  <div className="h-px bg-current w-1/4 mx-auto mb-4" />
-                  <p className="font-black text-sm uppercase tracking-widest">{t('common:allProductsLoaded', 'You have reached the end')}</p>
+                <div className="py-2 text-center w-full opacity-40">
+                  <div className="h-px bg-current w-1/4 mx-auto mb-3" />
+                  <p className="font-black text-[10px] sm:text-xs uppercase tracking-widest">{t('common:allProductsLoaded', 'You have reached the end')}</p>
                 </div>
               )}
             </div>

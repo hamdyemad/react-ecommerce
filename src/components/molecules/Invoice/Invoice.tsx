@@ -1,183 +1,229 @@
-import { useTranslation } from 'react-i18next';
-import { useDirection } from '../../../hooks/useDirection';
-import logoEn from '../../../assets/logos/logo_en.png';
-import logoAr from '../../../assets/logos/logo_ar.png';
+/**
+ * Invoice utility - generates a self-contained HTML string for PDF generation.
+ * Uses inline styles so it works perfectly with html2pdf's html2canvas capture.
+ */
 
-interface InvoiceProps {
-  order: any;
+interface InvoiceOrder {
+  order_number: string;
+  created_at: string;
+  customer?: { name: string; phone: string; email: string; address: string };
+  location?: { city_name: string; region_name: string; country_name: string };
+  vendors_stages?: { vendor_id: number; vendor_name: string; stage_name: string }[];
+  products?: any[];
+  pricing?: {
+    total_product_price: number;
+    total_tax: number;
+    shipping: number;
+    total_price: number;
+  };
+  promo?: { code: string; discount_amount: number };
 }
 
-export function Invoice({ order }: InvoiceProps) {
-  const { i18n } = useTranslation();
-  const { selectedCountry } = useDirection();
-  const isRTL = i18n.language === 'ar';
-  const currency = selectedCountry?.currency?.code || 'EGP';
+export function generateInvoiceHTML(order: InvoiceOrder, lang: string = 'en', logoUrl?: string): string {
+  const isRTL = lang === 'ar';
+  const dir = isRTL ? 'rtl' : 'ltr';
+  const currency = isRTL ? 'جنيه' : 'EGP';
+  const textAlign = isRTL ? 'right' : 'left';
+  const textAlignEnd = isRTL ? 'left' : 'right';
 
-  if (!order) return null;
+  const L = {
+    invoice: isRTL ? 'فاتورة' : 'INVOICE',
+    orderDetails: isRTL ? 'تفاصيل الطلب' : 'ORDER DETAILS',
+    customer: isRTL ? 'العميل' : 'CUSTOMER',
+    shipping: isRTL ? 'الشحن' : 'SHIPPING',
+    invoiceNo: isRTL ? 'رقم الفاتورة' : 'Invoice No.',
+    date: isRTL ? 'التاريخ' : 'Date',
+    status: isRTL ? 'الحالة' : 'Status',
+    name: isRTL ? 'الاسم' : 'Name',
+    phone: isRTL ? 'الهاتف' : 'Phone',
+    email: isRTL ? 'البريد' : 'Email',
+    address: isRTL ? 'العنوان' : 'Address',
+    city: isRTL ? 'المدينة' : 'City',
+    region: isRTL ? 'المنطقة' : 'Region',
+    country: isRTL ? 'الدولة' : 'Country',
+    orderItems: isRTL ? 'أصناف الطلب' : 'ORDER ITEMS',
+    product: isRTL ? 'المنتج' : 'PRODUCT',
+    price: isRTL ? 'السعر' : 'PRICE',
+    taxes: isRTL ? 'الضرائب' : 'TAXES',
+    priceIncTax: isRTL ? 'شامل الضريبة' : 'PRICE INC. TAX',
+    qty: isRTL ? 'الكمية' : 'QTY',
+    total: isRTL ? 'الإجمالي' : 'TOTAL',
+    subtotal: isRTL ? 'الإجمالي قبل الضريبة' : 'Subtotal',
+    pricesIncTax: isRTL ? 'شامل الضريبة' : 'Prices Inc. Tax',
+    shippingFee: isRTL ? 'الشحن' : 'Shipping',
+    totalWithShipping: isRTL ? 'شامل الشحن' : 'Total with Shipping',
+    grandTotal: isRTL ? 'الإجمالي النهائي' : 'Total',
+    promoDiscount: isRTL ? 'خصم الكود' : 'Promo Discount',
+    thankYou: isRTL ? 'شكراً لطلبك!' : 'Thank you for your order!',
+  };
 
-  return (
-    <div className="invoice-print-wrapper" dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="invoice-container">
-        {/* Invoice Title */}
-        <div className="invoice-title-section">
-          <div className="invoice-badge">
-            <h1>{isRTL ? 'فاتورة' : 'Invoice'}</h1>
-          </div>
-          <div className="invoice-order-info">
-            <div className="invoice-order-number">Anibal - {isRTL ? 'فاتورة' : 'Invoice'} #{order.order_number}</div>
-            <div className="invoice-order-date">{order.created_at || new Date().toLocaleDateString()}</div>
-          </div>
+  const stageName = order.vendors_stages?.[0]?.stage_name || 'N/A';
+  const totalProductPrice = order.pricing?.total_product_price || 0;
+  const totalTax = order.pricing?.total_tax || 0;
+  const shippingCost = order.pricing?.shipping || 0;
+  const totalPrice = order.pricing?.total_price || 0;
+  const pricesIncTax = totalProductPrice + totalTax;
+
+  // Build product rows
+  const productRows = (order.products || []).map((item: any, index: number) => {
+    const unitPrice = item.unit_price_without_taxes || 0;
+    const taxAmount = item.taxes?.reduce((sum: number, t: any) => sum + (t.amount || 0), 0) || 0;
+    const unitPriceAfterTax = item.unit_price_after_taxes || 0;
+    const taxBadges = (item.taxes || []).map((tax: any) =>
+      `<span style="display:inline-block;background:#eef;padding:1px 5px;border-radius:3px;font-size:7px;color:#0056B7;margin:1px;font-weight:600;">${tax.tax_name} ${tax.percentage}%</span>`
+    ).join('');
+
+    return `<tr>
+      <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;font-size:11px;text-align:center;color:#999;">${index + 1}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;">
+        <div style="font-weight:700;font-size:11px;color:#1a1a2e;margin-bottom:2px;">${item.product?.name || ''}</div>
+        ${item.vendor?.name ? `<div style="font-size:8px;color:#667eea;margin-bottom:2px;">${item.vendor.name}</div>` : ''}
+        ${item.variant?.sku || item.variant?.name ? `<span style="display:inline-block;background:rgba(0,86,183,0.08);padding:1px 6px;border-radius:3px;font-size:8px;color:#0056B7;font-weight:600;">${item.variant?.sku || item.variant?.name}</span>` : ''}
+      </td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;text-align:center;font-size:11px;">${unitPrice.toFixed(2)} ${currency}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;text-align:center;">
+        <div style="font-size:9px;">${taxAmount.toFixed(2)} ${currency}</div>
+        ${taxBadges ? `<div style="margin-top:2px;">${taxBadges}</div>` : ''}
+      </td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;text-align:center;font-size:11px;">${unitPriceAfterTax.toFixed(2)} ${currency}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;text-align:center;font-size:11px;font-weight:700;">${item.quantity}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #f0f0f0;text-align:${textAlignEnd};font-size:12px;font-weight:700;color:#1a1a2e;">${(item.total || 0).toFixed(2)} ${currency}</td>
+    </tr>`;
+  }).join('');
+
+  // Promo discount row
+  const promoRow = order.promo?.discount_amount && order.promo.discount_amount > 0
+    ? `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(0,0,0,0.06);">
+         <span style="font-size:12px;color:#666;">${L.promoDiscount} (${order.promo.code})</span>
+         <span style="font-size:12px;font-weight:600;color:#e74c3c;">-${order.promo.discount_amount.toFixed(2)} ${currency}</span>
+       </div>`
+    : '';
+
+  // Logo section
+  const logoSection = logoUrl
+    ? `<img src="${logoUrl}" alt="Anibal" style="height:50px;object-fit:contain;" crossorigin="anonymous" />`
+    : `<div style="font-family:cursive,serif;font-size:28px;font-weight:700;color:#1a1a2e;font-style:italic;">Anibal</div>`;
+
+  // Info row helper
+  const infoRow = (label: string, value: string, isLast = false) => `
+    <div style="display:flex;justify-content:space-between;padding:5px 0;${isLast ? '' : 'border-bottom:1px dashed rgba(0,0,0,0.05);'}">
+      <span style="font-size:11px;color:#888;font-weight:500;">${label}</span>
+      <span style="font-size:11px;font-weight:600;color:#1a1a2e;text-align:${textAlignEnd};max-width:130px;">${value}</span>
+    </div>`;
+
+  // Section header helper
+  const sectionHeader = (icon: string, title: string) => `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid rgba(0,86,183,0.1);">
+      <div style="width:26px;height:26px;background:linear-gradient(135deg,#0056B7,#003a7a);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;">${icon}</div>
+      <span style="font-size:10px;font-weight:700;color:#0056B7;text-transform:uppercase;letter-spacing:1px;">${title}</span>
+    </div>`;
+
+  // Summary row helper
+  const summaryRow = (label: string, value: string, isBold = false) => `
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed rgba(0,0,0,0.06);">
+      <span style="font-size:11px;color:#666;${isBold ? 'font-weight:700;' : ''}">${label}</span>
+      <span style="font-size:11px;font-weight:600;color:#1a1a2e;">${value}</span>
+    </div>`;
+
+  return `<div dir="${dir}" style="width:780px; min-height:1040px; margin:0; padding:0; background:#fff; font-family:Arial,Helvetica,sans-serif; color:#1a1a2e; line-height:1.4; font-size:12px; display:flex; flex-direction:column; justify-content:space-between;">
+  
+  <div>
+    <!-- Invoice Badge -->
+    <div style="padding:20px 30px 8px;text-align:center;">
+      <div style="background:linear-gradient(to right,#0056B7,#cb1037);padding:12px 20px;border-radius:14px;text-align:center;">
+        <span style="font-size:16px;font-weight:800;color:#fff;letter-spacing:4px;text-transform:uppercase;">${L.invoice}</span>
+      </div>
+      <div style="margin-top:10px;">
+        <div style="font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:3px;">Anibal - ${L.invoice} #${order.order_number}</div>
+        <div style="font-size:11px;color:#888;">${order.created_at}</div>
+      </div>
+    </div>
+
+    <!-- Logo -->
+    <div style="padding:8px 30px 18px;display:flex;justify-content:center;align-items:center;border-bottom:1px solid #f0f0f0;">
+      ${logoSection}
+    </div>
+
+    <!-- Content -->
+    <div style="padding:20px 30px;">
+      
+      <!-- Info Grid -->
+      <div style="background:linear-gradient(135deg,#f8f9ff 0%,#f0f4ff 100%);border-radius:12px;padding:18px;border:1px solid rgba(0,86,183,0.1);margin-bottom:20px;">
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <!-- Order Details -->
+            <td style="width:33%;vertical-align:top;padding-right:${isRTL ? '0' : '15px'};padding-left:${isRTL ? '15px' : '0'};border-${isRTL ? 'left' : 'right'}:1px dashed rgba(0,86,183,0.2);">
+              ${sectionHeader('📋', L.orderDetails)}
+              ${infoRow(L.invoiceNo, '#' + order.order_number)}
+              ${infoRow(L.date, order.created_at)}
+              <div style="display:flex;justify-content:space-between;padding:5px 0;">
+                <span style="font-size:11px;color:#888;font-weight:500;">${L.status}</span>
+                <span style="display:inline-block;padding:2px 10px;border-radius:10px;font-size:9px;font-weight:700;text-transform:uppercase;background:#0056B7;color:#fff;">${stageName}</span>
+              </div>
+            </td>
+            <!-- Customer -->
+            <td style="width:33%;vertical-align:top;padding:0 15px;border-${isRTL ? 'left' : 'right'}:1px dashed rgba(0,86,183,0.2);">
+              ${sectionHeader('👤', L.customer)}
+              ${infoRow(L.name, order.customer?.name || '-')}
+              ${infoRow(L.phone, order.customer?.phone || '-')}
+              ${infoRow(L.email, order.customer?.email || '-', true)}
+            </td>
+            <!-- Shipping -->
+            <td style="width:33%;vertical-align:top;padding-left:${isRTL ? '0' : '15px'};padding-right:${isRTL ? '15px' : '0'};">
+              ${sectionHeader('📍', L.shipping)}
+              ${infoRow(L.address, order.customer?.address || '-')}
+              ${infoRow(L.city, order.location?.city_name || '-')}
+              ${infoRow(L.region, order.location?.region_name || '-')}
+              ${infoRow(L.country, order.location?.country_name || 'Egypt', true)}
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Products Table -->
+      <div style="margin-bottom:15px;">
+        <div style="font-size:11px;font-weight:700;color:#0056B7;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:5px;border-bottom:2px solid rgba(0,86,183,0.15);">
+          ● ${L.orderItems}
         </div>
-        
-        {/* Header */}
-        <div className="invoice-header">
-          <div className="logo-section">
-            <img src={isRTL ? logoAr : logoEn} alt="Anibal" />
+        <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;">
+          <thead>
+            <tr style="background:linear-gradient(to right,#0056B7,#cb1037);">
+              <th style="padding:10px 12px;text-align:center;font-size:10px;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:5%;">#</th>
+              <th style="padding:10px 12px;text-align:${textAlign};font-size:10px;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:28%;">${L.product}</th>
+              <th style="padding:10px 12px;text-align:center;font-size:10px;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:12%;">${L.price}</th>
+              <th style="padding:10px 12px;text-align:center;font-size:10px;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:15%;">${L.taxes}</th>
+              <th style="padding:10px 12px;text-align:center;font-size:10px;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:13%;">${L.priceIncTax}</th>
+              <th style="padding:10px 12px;text-align:center;font-size:10px;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:8%;">${L.qty}</th>
+              <th style="padding:10px 12px;text-align:${textAlignEnd};font-size:10px;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:0.5px;width:17%;">${L.total}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${productRows}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Summary -->
+      <div style="display:flex;justify-content:flex-${isRTL ? 'start' : 'end'};margin-top:15px;">
+        <div style="min-width:260px;background:linear-gradient(135deg,#f8f9ff 0%,#f0f4ff 100%);border-radius:12px;padding:15px;border:1px solid rgba(0,86,183,0.1);">
+          ${summaryRow(L.subtotal, totalProductPrice.toFixed(2) + ' ' + currency)}
+          ${summaryRow(L.taxes, totalTax.toFixed(2) + ' ' + currency)}
+          ${summaryRow(L.pricesIncTax, pricesIncTax.toFixed(2) + ' ' + currency)}
+          ${summaryRow(L.shippingFee, shippingCost.toFixed(2) + ' ' + currency)}
+          ${summaryRow(L.totalWithShipping, (pricesIncTax + shippingCost).toFixed(2) + ' ' + currency)}
+          ${promoRow}
+          <div style="margin-top:8px;padding-top:10px;border-top:2px solid #0056B7;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:14px;font-weight:700;color:#1a1a2e;">${L.grandTotal}</span>
+            <span style="font-size:18px;font-weight:800;color:#0056B7;">${totalPrice.toFixed(2)} ${currency}</span>
           </div>
-        </div>
-
-        {/* Content */}
-        <div className="invoice-content">
-          {/* Combined Info Box */}
-          <div className="info-box">
-            <div className="info-box-grid">
-              {/* Order Details */}
-              <div className="info-section">
-                <div className="info-section-header">
-                  <div className="info-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>
-                    </svg>
-                  </div>
-                  <span className="info-section-title">{isRTL ? 'تفاصيل الطلب' : 'Order Details'}</span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">{isRTL ? 'رقم الفاتورة' : 'Invoice No.'}</span>
-                  <span className="info-value">#{order.order_number}</span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">{isRTL ? 'التاريخ' : 'Date'}</span>
-                  <span className="info-value">{order.created_at || '-'}</span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">{isRTL ? 'الحالة' : 'Status'}</span>
-                  <span className="status-badge">{order.current_stage?.name || 'N/A'}</span>
-                </div>
-              </div>
-
-              {/* Customer */}
-              <div className="info-section">
-                <div className="info-section-header">
-                  <div className="info-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
-                    </svg>
-                  </div>
-                  <span className="info-section-title">{isRTL ? 'العميل' : 'Customer'}</span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">{isRTL ? 'الاسم' : 'Name'}</span>
-                  <span className="info-value">{order.customer_name || '-'}</span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">{isRTL ? 'الهاتف' : 'Phone'}</span>
-                  <span className="info-value">{order.customer_phone || '-'}</span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">{isRTL ? 'البريد' : 'Email'}</span>
-                  <span className="info-value">{order.customer_email || '-'}</span>
-                </div>
-              </div>
-
-              {/* Shipping Address */}
-              <div className="info-section">
-                <div className="info-section-header">
-                  <div className="info-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
-                    </svg>
-                  </div>
-                  <span className="info-section-title">{isRTL ? 'الشحن' : 'Shipping'}</span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">{isRTL ? 'العنوان' : 'Address'}</span>
-                  <span className="info-value">{order.customer_address || '-'}</span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">{isRTL ? 'الدولة' : 'Country'}</span>
-                  <span className="info-value">{selectedCountry?.name || 'Egypt'}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Products Table */}
-          <div className="products-section">
-            <div className="section-title">{isRTL ? 'أصناف الطلب' : 'Order Items'}</div>
-            <table className="products-table">
-              <thead>
-                <tr>
-                  <th style={{ width: '5%' }}>#</th>
-                  <th style={{ width: '45%' }}>{isRTL ? 'المنتج' : 'Product'}</th>
-                  <th className="text-center" style={{ width: '15%' }}>{isRTL ? 'السعر' : 'Price'}</th>
-                  <th className="text-center" style={{ width: '10%' }}>{isRTL ? 'الكمية' : 'Qty'}</th>
-                  <th className="text-right" style={{ width: '25%' }}>{isRTL ? 'الإجمالي' : 'Total'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {order.products?.map((item: any, index: number) => (
-                  <tr key={item.id}>
-                    <td className="text-center">{index + 1}</td>
-                    <td>
-                      <div className="product-name">{item.product?.name}</div>
-                      <div className="product-sku">{item.product?.sku || 'N/A'}</div>
-                    </td>
-                    <td className="text-center">{item.price} {currency}</td>
-                    <td className="text-center">{item.quantity}</td>
-                    <td className="text-right">{item.total} {currency}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Summary */}
-          <div className="summary-section">
-            <div className="summary-card">
-              <div className="summary-row">
-                <span className="summary-label">{isRTL ? 'الإجمالي الفرعي' : 'Subtotal'}</span>
-                <span className="summary-value">{order.total_product_price || order.total} {currency}</span>
-              </div>
-              {order.total_tax > 0 && (
-                <div className="summary-row">
-                  <span className="summary-label">{isRTL ? 'الضرائب' : 'Taxes'}</span>
-                  <span className="summary-value">{order.total_tax} {currency}</span>
-                </div>
-              )}
-              {order.shipping > 0 && (
-                <div className="summary-row">
-                  <span className="summary-label">{isRTL ? 'الشحن' : 'Shipping'}</span>
-                  <span className="summary-value">{order.shipping} {currency}</span>
-                </div>
-              )}
-              {order.promo_discount > 0 && (
-                <div className="summary-row">
-                  <span className="summary-label">{isRTL ? 'خصم الكود' : 'Promo Discount'}</span>
-                  <span className="summary-value discount-value">-{order.promo_discount} {currency}</span>
-                </div>
-              )}
-              <div className="summary-row total">
-                <span className="summary-label">{isRTL ? 'الإجمالي' : 'Total'}</span>
-                <span className="summary-value">{order.total_price || order.total} {currency}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="invoice-footer">
-          <span className="footer-text">{isRTL ? 'شكراً لطلبك!' : 'Thank you for your order!'}</span>
         </div>
       </div>
     </div>
-  );
+  </div>
+
+  <!-- Footer -->
+  <div style="background:linear-gradient(135deg,#f8f9ff 0%,#f0f4ff 100%);padding:15px 30px;text-align:center;border-top:1px solid rgba(0,86,183,0.1);margin-top:auto;">
+    <span style="font-size:12px;font-weight:500;color:#888;">${L.thankYou}</span>
+  </div>
+</div>`;
 }

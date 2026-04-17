@@ -7,6 +7,7 @@ export interface PriceBreakdownProps {
   subtotal: number;
   total: number;
   discount?: number;
+  tax?: number;
   shippingCost?: number;
   isCalculatingShipping?: boolean;
   className?: string;
@@ -16,6 +17,7 @@ export const PriceBreakdown: React.FC<PriceBreakdownProps> = ({
   subtotal,
   total,
   discount = 0,
+  tax = 0,
   shippingCost = 0,
   isCalculatingShipping = false,
   className,
@@ -50,6 +52,14 @@ export const PriceBreakdown: React.FC<PriceBreakdownProps> = ({
         <div className="flex items-center justify-between text-green-600">
           <span className="text-sm italic">{t('discount')}</span>
           <span className="text-sm font-medium">-{renderAmount(discount)}</span>
+        </div>
+      )}
+
+      {/* Tax */}
+      {tax > 0 && (
+        <div className="flex items-center justify-between text-text-secondary">
+          <span className="text-sm">{t('tax', 'Taxes & Fees')}</span>
+          <span className="text-sm font-medium">{renderAmount(tax)}</span>
         </div>
       )}
 

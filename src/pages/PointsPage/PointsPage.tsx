@@ -21,23 +21,32 @@ export function PointsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchSummary = async () => {
       try {
-        const [summaryRes, transRes] = await Promise.all([
-          pointsService.getMyPoints(),
-          pointsService.getTransactions()
-        ]);
-        
-        if (summaryRes.status) setSummary(summaryRes.data);
-        if (transRes.status) setTransactions(transRes.data.items);
+        const res = await pointsService.getMyPoints();
+        if (res.status && res.data) {
+          setSummary(res.data);
+        }
       } catch (error) {
-        console.error('Error fetching points data:', error);
+        console.error('Error fetching points summary:', error);
+      }
+    };
+
+    const fetchTransactions = async () => {
+      try {
+        const res = await pointsService.getTransactions();
+        if (res.status && res.data) {
+          setTransactions(res.data.items || []);
+        }
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchSummary();
+    fetchTransactions();
   }, []);
 
   const menuItems = [
@@ -46,10 +55,7 @@ export function PointsPage() {
     { id: 'points', label: t('myPoints', 'My Points'), icon: '💰', path: '/profile/points' },
     { id: 'reviews', label: t('reviews'), icon: '⭐', path: '/profile/reviews' },
     { id: 'wishlist', label: t('wishlist'), icon: '❤️', path: '/wishlist' },
-    { id: 'addresses', label: t('addresses'), icon: '📍', path: '/profile/addresses' },
-    { id: 'payment', label: t('paymentMethods'), icon: '💳', path: '/profile/payment' },
-    { id: 'notifications', label: t('notifications'), icon: '🔔', path: '/profile/notifications', badge: '0' },
-    { id: 'settings', label: t('settings'), icon: '⚙️', path: '/profile/settings' }
+    { id: 'addresses', label: t('addresses'), icon: '📍', path: '/profile/addresses' }
   ];
 
   if (!user) return null;
@@ -138,28 +144,65 @@ export function PointsPage() {
             </div>
           </div>
 
+          {/* Expiring Soon Banner */}
+          {summary?.expiring_soon && summary.expiring_soon.length > 0 && (
+            <div 
+              className="p-6 rounded-[30px] flex items-center justify-between gap-4 border-2 border-dashed animate-pulse"
+              style={{ 
+                borderColor: `${tokens.colors[mode].error.DEFAULT}40`,
+                background: `${tokens.colors[mode].error.DEFAULT}05`
+              }}
+            >
+              <div className="flex items-center gap-4">
+                <span className="text-3xl">⚠️</span>
+                <div>
+                  <h4 className="font-black text-lg" style={{ color: tokens.colors[mode].error.DEFAULT }}>
+                    {t('expiringSoon', 'Points Expiring Soon!')}
+                  </h4>
+                  <p className="text-sm font-bold opacity-60" style={{ color: tokens.colors[mode].text.secondary }}>
+                    {t('expiringSoonDesc', 'You have points that will expire in the next 30 days. Use them now!')}
+                  </p>
+                </div>
+              </div>
+              <Link 
+                to="/products"
+                className="px-6 py-3 rounded-2xl font-black text-sm text-white transition-transform hover:scale-105"
+                style={{ background: tokens.colors[mode].error.DEFAULT }}
+              >
+                {t('shopNow', 'Shop Now')}
+              </Link>
+            </div>
+          )}
+
           {/* Points Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
             {[
-              { label: t('earnedPoints', 'Total Earned'), value: summary?.earned_points || 0, icon: '📈', color: tokens.colors[mode].success.DEFAULT },
-              { label: t('redeemedPoints', 'Redeemed'), value: summary?.redeemed_points || 0, icon: '🛒', color: tokens.colors[mode].warning.DEFAULT },
-              { label: t('expiredPoints', 'Expired'), value: summary?.expired_points || 0, icon: '⏰', color: tokens.colors[mode].error.DEFAULT },
+              { label: t('earnedPoints', 'Total Earned'), value: summary?.earned_points || 0, icon: '📈', color: tokens.colors[mode].success.DEFAULT, desc: t('earnedPointsDesc', 'Points from purchases') },
+              { label: t('redeemedPoints', 'Redeemed'), value: summary?.redeemed_points || 0, icon: '🛒', color: tokens.colors[mode].warning.DEFAULT, desc: t('redeemedPointsDesc', 'Used for discounts') },
+              { label: t('adjustedPoints', 'Adjusted'), value: summary?.adjusted_points || 0, icon: '🛠️', color: tokens.colors[mode].primary.DEFAULT, desc: t('adjustedPointsDesc', 'Manual or bonus changes') },
+              { label: t('expiredPoints', 'Expired'), value: summary?.expired_points || 0, icon: '⏰', color: tokens.colors[mode].error.DEFAULT, desc: t('expiredPointsDesc', 'No longer valid') },
             ].map((stat, i) => (
               <div 
                 key={i}
-                className="p-8 rounded-[35px] flex items-center gap-6"
+                className="p-6 rounded-[35px] flex flex-col gap-4 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300"
                 style={{
                   background: tokens.gradients.surface[mode],
                   border: `1px solid ${tokens.colors[mode].border.DEFAULT}`,
                   boxShadow: tokens.shadows.sm
                 }}
               >
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style={{ background: `${stat.color}15`, color: stat.color }}>
-                  {stat.icon}
+                <div className="absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full blur-2xl opacity-10 transition-opacity group-hover:opacity-20" style={{ background: stat.color }} />
+                
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl" style={{ background: `${stat.color}15`, color: stat.color }}>
+                    {stat.icon}
+                  </div>
+                  <span className="text-2xl font-black" style={{ color: tokens.colors[mode].text.primary }}>{stat.value}</span>
                 </div>
+                
                 <div>
-                  <span className="block text-sm font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</span>
-                  <span className="text-3xl font-black" style={{ color: tokens.colors[mode].text.primary }}>{stat.value}</span>
+                  <span className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">{stat.label}</span>
+                  <p className="text-[10px] font-bold opacity-40 italic" style={{ color: tokens.colors[mode].text.secondary }}>{stat.desc}</p>
                 </div>
               </div>
             ))}
@@ -216,8 +259,8 @@ export function PointsPage() {
                           </span>
                         </td>
                         <td className="px-6 py-6 border-y text-center" style={{ borderColor: tokens.colors[mode].border.DEFAULT, background: tokens.colors[mode].surface.base }}>
-                          <span className={`text-xl font-black ${transaction.type === 'earned' ? 'text-green-500' : 'text-red-500'}`}>
-                            {transaction.type === 'earned' ? '+' : '-'}{transaction.points}
+                          <span className={`text-xl font-black ${transaction.points.startsWith('-') ? 'text-red-500' : 'text-emerald-500'}`}>
+                            {transaction.points.startsWith('-') ? transaction.points : `+${transaction.points}`}
                           </span>
                         </td>
                         <td className="px-6 py-6 rounded-r-[25px] border-y border-r text-right" style={{ borderColor: tokens.colors[mode].border.DEFAULT, background: tokens.colors[mode].surface.base }}>

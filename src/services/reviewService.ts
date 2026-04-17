@@ -13,5 +13,10 @@ export const reviewService = {
       params: { ...params, paginated: 'ok' }
     });
     return response.data;
+  },
+
+  getMyReviews: async (): Promise<ApiResponse<any[]>> => {
+    const response = await api.get('/reviews/my-reviews');
+    return response.data;
   }
 };

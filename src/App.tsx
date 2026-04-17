@@ -85,7 +85,7 @@ interface CartItemType {
 function DemoContent() {
   const { mode, toggleMode } = useTheme();
   const { language, setLanguage, country, setSelectedCountry } = useDirection();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: isAuthLoading } = useAuth();
   const navigate = useNavigate();
   const [showCart, setShowCart] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -93,6 +93,7 @@ function DemoContent() {
   const [cartItems, setCartItems] = useState<CartItemType[]>([]);
   const [serverTotals, setServerTotals] = useState({ subtotal: 0, total: 0 });
   const [isCartActionLoading, setIsCartActionLoading] = useState(false);
+  const [isCartLoading, setIsCartLoading] = useState(true);
   
   const [appliedPromo, setAppliedPromo] = useState<any>(() => {
     const saved = localStorage.getItem('anibal_applied_promo');
@@ -103,7 +104,10 @@ function DemoContent() {
 
   // 1. Fetch Cart Data
   useEffect(() => {
+    if (isAuthLoading) return;
+
     const fetchCart = async () => {
+      setIsCartLoading(true);
       if (isAuthenticated) {
         try {
           const res = await cartService.getCart();
@@ -168,9 +172,10 @@ function DemoContent() {
         const saved = localStorage.getItem('anibal_guest_cart');
         setCartItems(saved ? JSON.parse(saved) : []);
       }
+      setIsCartLoading(false);
     };
     fetchCart();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isAuthLoading]);
 
   // 2. Persist Guest Cart
   useEffect(() => {
@@ -291,10 +296,14 @@ function DemoContent() {
   const handleQuantityChange = async (id: string | number, newQuantity: number) => {
     if (isAuthenticated) {
       const item = cartItems.find(i => i.id === String(id));
-      if (item?.server_id) {
+      if (item) {
         setIsCartActionLoading(true);
         try {
-          await cartService.updateQuantity(item.server_id, newQuantity);
+          await cartService.updateQuantity({
+            vendor_product_id: Number(item.vendor_product_id),
+            vendor_product_variant_id: item.vendor_product_variant_id ? Number(item.vendor_product_variant_id) : null,
+            quantity: newQuantity
+          });
           const res = await cartService.getCart();
           const mappedItems = res.data.items.map((item: any) => ({
             id: String(item.product.id),
@@ -405,9 +414,7 @@ function DemoContent() {
     };
   }, []);
 
-  const subtotal = isAuthenticated 
-    ? serverTotals.subtotal 
-    : cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   
   const discount = appliedPromo 
     ? (appliedPromo.discount_type === 'percent' 
@@ -420,7 +427,7 @@ function DemoContent() {
     : subtotal - discount;
 
   return (
-    <div className="min-h-screen transition-colors duration-200">
+    <div className="min-h-screen flex flex-col transition-colors duration-200">
       <ScrollToTop />
       
       <Header
@@ -444,7 +451,7 @@ function DemoContent() {
         onClose={() => setShowSidebar(false)}
       />
 
-      <main className="max-w-7xl mx-auto px-6 transition-colors duration-200">
+      <main className="flex-grow max-w-7xl mx-auto px-6 transition-colors duration-200 w-full">
         {showCart && (
           <CartDrawer
             items={cartItems}
@@ -487,7 +494,7 @@ function DemoContent() {
               onCheckout={() => navigate('/checkout')} 
             />
           } />
-          <Route path="/checkout" element={<CheckoutPage items={cartItems} subtotal={subtotal} total={total} appliedPromo={appliedPromo} setAppliedPromo={setAppliedPromo} onOrderSuccess={handleOrderSuccess} />} />
+          <Route path="/checkout" element={<CheckoutPage items={cartItems} subtotal={subtotal} total={total} appliedPromo={appliedPromo} setAppliedPromo={setAppliedPromo} onOrderSuccess={handleOrderSuccess} isCartLoading={isCartLoading} />} />
           <Route path="/track-order" element={<TrackOrderPage />} />
           <Route path="/track-order/:reference" element={<TrackOrderPage />} />
 

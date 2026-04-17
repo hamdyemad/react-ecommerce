@@ -1,6 +1,6 @@
 import { useTheme } from '../../hooks/useTheme';
 import { BreadCrumb } from '../../components/molecules/BreadCrumb';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { tokens } from '../../tokens';
@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCatalog } from '../../hooks/useCatalog';
 import { FormInput } from '../../components/atoms/FormInput';
 import toast from 'react-hot-toast';
+import { orderService } from '../../services/orderService';
 
 export function ProfilePage() {
   const { mode } = useTheme();
@@ -19,6 +20,8 @@ export function ProfilePage() {
   const { countries } = useCatalog();
   const [activeTab] = useState('account');
   const [isEditing, setIsEditing] = useState(false);
+  const [orderStages, setOrderStages] = useState<any[]>([]);
+  const [statistics] = useState<Record<string, number>>({});
 
   const selectedCountry = countries.find(c => String(c.id) === String(user?.country?.id)) || countries[0];
   
@@ -103,6 +106,35 @@ export function ProfilePage() {
     navigate('/login');
   };
 
+  useEffect(() => {
+    const fetchStagesAndStats = async () => {
+      try {
+        const [stagesRes] = await Promise.all([
+          orderService.getOrderStages(),
+          // Assuming an endpoint exists or will be added for stats counts
+          // api.get('/orders/statistics') 
+        ]);
+
+        if (stagesRes.status) {
+          const sorted = [...stagesRes.data].sort((a, b) => {
+            // Put non-null types first
+            if (a.type !== null && b.type === null) return -1;
+            if (a.type === null && b.type !== null) return 1;
+            // Otherwise maintain sort_order
+            return (a.sort_order || 0) - (b.sort_order || 0);
+          });
+          setOrderStages(sorted);
+        }
+      } catch (err) {
+        console.error('Failed to fetch order stages', err);
+      }
+    };
+
+    if (user) {
+      fetchStagesAndStats();
+    }
+  }, [user]);
+
   // User data from auth
   const userData = {
     name: user.full_name || 'Guest User',
@@ -112,13 +144,41 @@ export function ProfilePage() {
     memberSince: user.created_at
   };
 
-  const orderStats = [
-    { key: 'totalOrders', value: 0, icon: '📦', color: tokens.colors[mode].primary.DEFAULT },
-    { key: 'pendingOrders', value: 0, icon: '⏳', color: tokens.colors[mode].warning.DEFAULT },
-    { key: 'completedOrders', value: 0, icon: '✅', color: tokens.colors[mode].success.DEFAULT },
-    { key: 'cancelledOrders', value: 0, icon: '❌', color: tokens.colors[mode].error.DEFAULT },
-    { key: 'ordersNotDelivered', value: 0, icon: '🚚', color: tokens.colors[mode].primary[600] },
-    { key: 'returnedOrders', value: 0, icon: '↩️', color: tokens.colors[mode].accent.DEFAULT }
+  const getStageIcon = (slug: string) => {
+    switch (slug) {
+      case 'new': return '📦';
+      case 'in-progress': return '⏳';
+      case 'deliver': return '✅';
+      case 'cancel': return '❌';
+      case 'shipping-with-aramex': return '🚚';
+      default: return '📦';
+    }
+  };
+
+  const dynamicOrderStats = [
+    { 
+      key: 'totalOrders', 
+      label: t('totalOrders'),
+      value: Object.values(statistics).reduce((a, b) => a + b, 0) || 0, 
+      icon: '📊', 
+      color: tokens.colors[mode].primary.DEFAULT 
+    },
+    ...orderStages.map(stage => ({
+      key: stage.slug,
+      label: stage.name,
+      value: statistics[stage.slug] || 0,
+      icon: getStageIcon(stage.slug),
+      color: stage.color || tokens.colors[mode].primary.DEFAULT
+    }))
+  ];
+
+  const orderStats = dynamicOrderStats.length > 1 ? dynamicOrderStats : [
+    { key: 'totalOrders', label: t('totalOrders'), value: 0, icon: '📦', color: tokens.colors[mode].primary.DEFAULT },
+    { key: 'pendingOrders', label: t('pendingOrders'), value: 0, icon: '⏳', color: tokens.colors[mode].warning.DEFAULT },
+    { key: 'completedOrders', label: t('completedOrders'), value: 0, icon: '✅', color: tokens.colors[mode].success.DEFAULT },
+    { key: 'cancelledOrders', label: t('cancelledOrders'), value: 0, icon: '❌', color: tokens.colors[mode].error.DEFAULT },
+    { key: 'ordersNotDelivered', label: t('ordersNotDelivered'), value: 0, icon: '🚚', color: tokens.colors[mode].primary[600] },
+    { key: 'returnedOrders', label: t('returnedOrders'), value: 0, icon: '↩️', color: tokens.colors[mode].accent.DEFAULT }
   ];
 
   const menuItems = [
@@ -127,10 +187,7 @@ export function ProfilePage() {
     { id: 'points', label: t('myPoints', 'My Points'), icon: '💰', path: '/profile/points' },
     { id: 'reviews', label: t('reviews'), icon: '⭐', path: '/profile/reviews' },
     { id: 'wishlist', label: t('wishlist'), icon: '❤️', path: '/wishlist' },
-    { id: 'addresses', label: t('addresses'), icon: '📍', path: '/profile/addresses' },
-    { id: 'payment', label: t('paymentMethods'), icon: '💳', path: '/profile/payment' },
-    { id: 'notifications', label: t('notifications'), icon: '🔔', path: '/profile/notifications', badge: '0' },
-    { id: 'settings', label: t('settings'), icon: '⚙️', path: '/profile/settings' }
+    { id: 'addresses', label: t('addresses'), icon: '📍', path: '/profile/addresses' }
   ];
 
   return (
@@ -144,7 +201,7 @@ export function ProfilePage() {
 
       {/* Welcome Banner */}
       <div 
-        className="p-12 rounded-[40px] mb-12 text-center relative overflow-hidden"
+        className="p-8 sm:p-12 rounded-[30px] sm:rounded-[40px] mb-8 sm:mb-12 text-center relative overflow-hidden"
         style={{
           background: tokens.gradients.primary,
           boxShadow: `0 20px 50px ${tokens.colors[mode].primary[500]}4D`
@@ -153,10 +210,10 @@ export function ProfilePage() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl animate-pulse" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/20 rounded-full -ml-20 -mb-20 blur-3xl" />
         
-        <h1 className="text-5xl font-black text-white mb-4 relative z-10">
+        <h1 className="text-2xl sm:text-5xl font-black text-white mb-3 sm:mb-4 relative z-10 leading-tight">
           {t('welcome')}, {userData.name}! 👋
         </h1>
-        <p className="text-white/90 text-xl max-w-2xl mx-auto relative z-10 leading-relaxed">
+        <p className="text-white/90 text-base sm:text-xl max-w-2xl mx-auto relative z-10 leading-relaxed">
           {t('manageAccount')}
         </p>
       </div>
@@ -166,16 +223,16 @@ export function ProfilePage() {
         <div className="lg:col-span-1">
           {/* User Card */}
           <div 
-            className="p-8 rounded-[35px] mb-8 text-center"
+            className="p-6 sm:p-8 rounded-[30px] sm:rounded-[35px] mb-6 sm:mb-8 text-center"
             style={{
               background: tokens.gradients.surface[mode],
               border: `1px solid ${tokens.colors[mode].border.DEFAULT}`,
               boxShadow: tokens.shadows.md
             }}
           >
-            <div className="relative inline-block mb-6">
+            <div className="relative inline-block mb-4 sm:mb-6">
               <div 
-                className="w-36 h-36 rounded-full mx-auto p-1.5"
+                className="w-28 h-28 sm:w-36 sm:h-36 rounded-full mx-auto p-1.5"
                 style={{
                   background: tokens.gradients.primary
                 }}
@@ -247,7 +304,7 @@ export function ProfilePage() {
 
           {/* Menu Items */}
           <div 
-            className="rounded-[35px] overflow-hidden"
+            className="rounded-[30px] sm:rounded-[35px] overflow-hidden"
             style={{
               background: tokens.gradients.surface[mode],
               border: `1px solid ${tokens.colors[mode].border.DEFAULT}`,
@@ -287,7 +344,7 @@ export function ProfilePage() {
                     <span className="font-black">{item.label}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    {item.badge && (
+                    {(item as any).badge && (
                       <span 
                         className="px-2.5 py-1 rounded-full text-[10px] font-black shadow-lg animate-pulse"
                         style={{
@@ -295,7 +352,7 @@ export function ProfilePage() {
                           color: tokens.colors[mode].text.inverse
                         }}
                       >
-                        {item.badge}
+                        {(item as any).badge}
                       </span>
                     )}
                     {activeTab === item.id && (
@@ -329,16 +386,16 @@ export function ProfilePage() {
         <div className="lg:col-span-3">
           {/* Account Information / Edit Form */}
           <div 
-            className="p-10 rounded-[40px] mb-12"
+            className="p-6 sm:p-10 rounded-[30px] sm:rounded-[40px] mb-8 sm:mb-12"
             style={{
               background: tokens.gradients.surface[mode],
               border: `1px solid ${tokens.colors[mode].border.DEFAULT}`,
               boxShadow: tokens.shadows.sm
             }}
           >
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-8 sm:mb-10">
               <h2 
-                className="text-4xl font-black"
+                className="text-2xl sm:text-4xl font-black"
                 style={{ color: tokens.colors[mode].text.primary }}
               >
                 {isEditing ? t('editProfile') : t('accountInformation')}
@@ -346,7 +403,7 @@ export function ProfilePage() {
               {!isEditing && (
                 <button 
                   onClick={startEditing}
-                  className="px-8 py-3.5 rounded-2xl font-black transition-all duration-500 hover:scale-105 active:scale-95 shadow-xl"
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-2xl font-black transition-all duration-500 hover:scale-105 active:scale-95 shadow-xl"
                   style={{
                     background: tokens.gradients.primary,
                     color: tokens.colors[mode].text.inverse
@@ -540,15 +597,15 @@ export function ProfilePage() {
           {!isEditing && (
             <>
               {/* Order Statistics */}
-              <div className="mb-12">
-                <h2 className="text-4xl font-black mb-8" style={{ color: tokens.colors[mode].text.primary }}>
+              <div className="mb-8 sm:mb-12">
+                <h2 className="text-2xl sm:text-4xl font-black mb-6 sm:mb-8" style={{ color: tokens.colors[mode].text.primary }}>
                   {t('orderStatistics')}
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {orderStats.map((stat, index) => (
                     <div
                       key={index}
-                      className="p-8 rounded-[35px] transition-all duration-500 hover:scale-[1.03] group relative overflow-hidden"
+                      className="p-6 sm:p-8 rounded-[30px] sm:rounded-[35px] transition-all duration-500 hover:scale-[1.03] group relative overflow-hidden"
                       style={{
                         background: tokens.gradients.surface[mode],
                         border: `1px solid ${tokens.colors[mode].border.DEFAULT}`,
@@ -557,15 +614,15 @@ export function ProfilePage() {
                     >
                       <div className="absolute top-0 right-0 w-32 h-32 bg-current opacity-[0.03] rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" style={{ color: stat.color }} />
                       <div className="flex items-center justify-between mb-6">
-                        <div className="w-20 h-20 rounded-[28px] flex items-center justify-center shadow-inner" style={{ background: `${stat.color}15`, color: stat.color }}>
-                          <span className="text-4xl transform group-hover:scale-125 transition-transform duration-500">{stat.icon}</span>
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-[24px] sm:rounded-[28px] flex items-center justify-center shadow-inner" style={{ background: `${stat.color}15`, color: stat.color }}>
+                          <span className="text-3xl sm:text-4xl transform group-hover:scale-125 transition-transform duration-500">{stat.icon}</span>
                         </div>
-                        <div className="text-5xl font-black tracking-tighter" style={{ color: stat.color }}>
+                        <div className="text-4xl sm:text-5xl font-black tracking-tighter" style={{ color: stat.color }}>
                           {stat.value}
                         </div>
                       </div>
                       <h3 className="text-xl font-black uppercase tracking-tight" style={{ color: tokens.colors[mode].text.secondary }}>
-                        {t(stat.key)}
+                        {stat.label || t(stat.key)}
                       </h3>
                     </div>
                   ))}
@@ -574,15 +631,15 @@ export function ProfilePage() {
 
               {/* Recent Orders */}
               <div 
-                className="p-12 rounded-[40px] relative overflow-hidden"
+                className="p-8 sm:p-12 rounded-[30px] sm:rounded-[40px] relative overflow-hidden"
                 style={{
                   background: tokens.gradients.surface[mode],
                   border: `1px solid ${tokens.colors[mode].border.DEFAULT}`,
                   boxShadow: tokens.shadows.sm
                 }}
               >
-                <div className="flex items-center justify-between mb-10 relative z-10">
-                  <h2 className="text-4xl font-black" style={{ color: tokens.colors[mode].text.primary }}>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 sm:mb-10 relative z-10">
+                  <h2 className="text-2xl sm:text-4xl font-black" style={{ color: tokens.colors[mode].text.primary }}>
                     {t('recentOrders')}
                   </h2>
                   <Link to="/profile/orders" className="text-sm font-black hover:underline underline-offset-8 flex items-center gap-2" style={{ color: tokens.colors[mode].primary.DEFAULT }}>

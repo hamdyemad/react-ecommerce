@@ -42,7 +42,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen py-16 flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen py-8 sm:py-16 flex items-center justify-center relative overflow-hidden">
       <SEO title={t('signIn', 'Sign In')} />
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
@@ -57,7 +57,7 @@ export function LoginPage() {
              🛍️
           </div>
           <h1 
-            className="text-5xl font-black mb-4 pb-2"
+            className="text-3xl sm:text-5xl font-black mb-3 pb-1 sm:mb-4 sm:pb-2"
             style={{ 
               background: tokens.gradients.primary,
               WebkitBackgroundClip: 'text',
@@ -66,21 +66,21 @@ export function LoginPage() {
           >
             {t('welcomeBack')}
           </h1>
-          <p className="text-xl font-bold opacity-70" style={{ color: tokens.colors[mode].text.secondary }}>
+          <p className="text-lg sm:text-xl font-bold opacity-70" style={{ color: tokens.colors[mode].text.secondary }}>
             {t('signInSubtitle')}
           </p>
         </div>
 
         {/* Login Form */}
         <div 
-          className="rounded-[45px] p-10 md:p-12 transition-all duration-500 shadow-2xl hover:shadow-[0_40px_100px_rgba(0,0,0,0.1)] group"
+          className="rounded-[35px] sm:rounded-[45px] p-6 sm:p-10 md:p-12 transition-all duration-500 shadow-2xl hover:shadow-[0_40px_100px_rgba(0,0,0,0.1)] group"
           style={{
             background: tokens.colors[mode].surface.elevated,
             backdropFilter: 'blur(30px)',
             border: `1px solid ${tokens.colors[mode].border.DEFAULT}`,
           }}
         >
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-8">
             <FormInput
               label={t('emailAddress')}
               type="email"
@@ -100,14 +100,14 @@ export function LoginPage() {
             />
 
             {/* Remember & Forgot */}
-            <div className="flex items-center justify-between px-1">
-              <label className="flex items-center gap-3 cursor-pointer group/check">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-2 px-1">
+              <label className="flex items-center gap-2 sm:gap-3 cursor-pointer group/check">
                 <input 
                   type="checkbox" 
-                  className="w-6 h-6 rounded-lg border-2 transition-all cursor-pointer accent-primary" 
+                  className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg border-2 transition-all cursor-pointer accent-primary" 
                 />
                 <span 
-                  className="text-sm font-bold opacity-70 group-hover/check:opacity-100 transition-opacity"
+                  className="text-xs sm:text-sm font-bold opacity-70 group-hover/check:opacity-100 transition-opacity"
                   style={{ color: tokens.colors[mode].text.secondary }}
                 >
                   {t('rememberMe')}
@@ -115,7 +115,7 @@ export function LoginPage() {
               </label>
               <Link
                 to="/forgot-password"
-                className="text-sm font-black hover:text-primary transition-all hover:underline underline-offset-4"
+                className="text-xs sm:text-sm font-black hover:text-primary transition-all hover:underline underline-offset-4"
                 style={{ color: tokens.colors[mode].primary.DEFAULT }}
               >
                 {t('forgotPassword')}
@@ -128,7 +128,7 @@ export function LoginPage() {
               variant="primary"
               size="lg"
               disabled={loading}
-              className="w-full py-5 rounded-2xl font-black text-xl transition-all duration-500 hover:scale-[1.03] active:scale-95 shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-4 sm:py-5 rounded-2xl font-black text-lg sm:text-xl transition-all duration-500 hover:scale-[1.03] active:scale-95 shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 background: tokens.gradients.primary,
                 boxShadow: '0 20px 50px rgba(102, 126, 234, 0.4)',
@@ -144,7 +144,7 @@ export function LoginPage() {
           </form>
 
           {/* Divider */}
-          <div className="relative my-10">
+          <div className="relative my-6 sm:my-10">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-dashed" style={{ borderColor: tokens.colors[mode].border.DEFAULT }} />
             </div>
@@ -167,7 +167,7 @@ export function LoginPage() {
               onClick={() => {
                 window.location.href = `${import.meta.env.VITE_API_URL}/auth/google/redirect`;
               }}
-              className="py-5 px-4 rounded-2xl font-black transition-all duration-500 hover:scale-[1.05] active:scale-95 flex items-center justify-center gap-3 shadow-lg"
+              className="py-4 sm:py-5 px-4 rounded-2xl font-black transition-all duration-500 hover:scale-[1.05] active:scale-95 flex items-center justify-center gap-3 shadow-lg text-sm sm:text-base"
               style={{
                 background: tokens.colors[mode].surface.base,
                 color: tokens.colors[mode].text.primary,

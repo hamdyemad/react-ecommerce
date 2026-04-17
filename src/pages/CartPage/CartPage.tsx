@@ -107,7 +107,7 @@ export function CartPage({
           {/* Cart Items - Left Side */}
           <div className="lg:col-span-2 space-y-4 md:space-y-8">
             <div 
-              className="rounded-[20px] sm:rounded-[35px] md:rounded-[45px] p-4 sm:p-6 md:p-10 shadow-lg md:shadow-2xl relative overflow-hidden group"
+              className="rounded-[20px] sm:rounded-[35px] md:rounded-[45px] p-2 sm:p-6 md:p-10 shadow-lg md:shadow-2xl relative overflow-hidden group"
               style={{
                 background: tokens.colors[mode].surface.elevated,
                 backdropFilter: 'blur(30px)',
@@ -126,11 +126,7 @@ export function CartPage({
                 {items.map((item) => (
                   <div
                     key={item.id}
-                    className="p-3 sm:p-5 md:p-8 rounded-[16px] sm:rounded-[25px] md:rounded-[35px] transition-all duration-300 hover:scale-[1.01]"
-                    style={{
-                      background: tokens.colors[mode].surface.base,
-                      border: `1px solid ${tokens.colors[mode].border.DEFAULT}`
-                    }}
+                    className="transition-all duration-300 hover:scale-[1.01]"
                   >
                     <CartItem
                       {...item}

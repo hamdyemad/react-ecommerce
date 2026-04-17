@@ -73,7 +73,7 @@ export function WishlistPage({ onAddToCart, onToggleWishlist, wishlistItems }: W
                 style={{ background: tokens.gradients.primary }}
                 onClick={() => {
                   wishlist.forEach(product => {
-                    if (product.remaining_stock > 0) {
+                    if (product.remaining_stock > 0 && product.department?.slug !== 'construction-chemicals') {
                       onAddToCart(product.id as any);
                     }
                   });
@@ -138,10 +138,10 @@ export function WishlistPage({ onAddToCart, onToggleWishlist, wishlistItems }: W
                   category={product.category}
                   sub_category={product.sub_category}
                   remaining_stock={product.remaining_stock}
-                  onAddToCart={onAddToCart as any}
-                  onToggleWishlist={onToggleWishlist as any}
-                  isInWishlist={wishlistItems.includes(product.id)}
-                />
+                   onAddToCart={onAddToCart as any}
+                   onToggleWishlist={onToggleWishlist as any}
+                   isInWishlist={wishlistItems.includes(product.id)}
+                 />
                 
                 {product.remaining_stock <= 0 && (
                   <div 

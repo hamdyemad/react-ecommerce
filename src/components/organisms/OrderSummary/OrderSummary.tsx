@@ -73,7 +73,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
 
   return (
     <div 
-      className="rounded-[24px] sm:rounded-[38px] md:rounded-[45px] p-5 sm:p-7 md:p-10 sticky top-24 shadow-xl md:shadow-2xl relative overflow-hidden flex flex-col transition-all duration-300"
+      className="rounded-[24px] sm:rounded-[38px] md:rounded-[45px] p-4 sm:p-7 md:p-10 sticky top-24 shadow-xl md:shadow-2xl relative overflow-hidden flex flex-col transition-all duration-300"
       style={{
         background: tokens.colors[mode].surface.elevated,
         backdropFilter: 'blur(30px)',
@@ -83,7 +83,7 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
       <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-[80px] -mr-24 -mt-24" />
       
       <h2 
-        className="text-xl sm:text-2xl md:text-3xl font-black mb-5 md:mb-8 relative z-10 flex items-center gap-3"
+        className="text-lg sm:text-xl md:text-2xl font-black mb-5 md:mb-8 relative z-10 flex items-center gap-3"
         style={{ color: tokens.colors[mode].text.primary }}
       >
         🧾 {t('orderSummary')}
@@ -123,7 +123,8 @@ export const OrderSummary: React.FC<OrderSummaryProps> = ({
       <div className="mb-5 md:mb-8 relative z-10">
         <PriceBreakdown
           subtotal={subtotal}
-          discount={subtotal - total}
+          discount={Math.max(0, subtotal - total)}
+          tax={Math.max(0, total - subtotal)}
           shippingCost={shippingCost}
           total={total + shippingCost}
           isCalculatingShipping={isCalculatingShipping}

@@ -51,4 +51,12 @@ export const orderService = {
     const response = await api.post('/promocode/check', { code });
     return response.data;
   },
+  getOrders: async (page: number = 1): Promise<any> => {
+    const response = await api.get('/orders', { params: { page } });
+    return response.data;
+  },
+  getOrderStages: async (): Promise<any> => {
+    const response = await api.get('/order-stages');
+    return response.data;
+  },
 };
