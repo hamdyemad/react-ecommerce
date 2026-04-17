@@ -59,7 +59,7 @@ export function ProductGrid({
               reviews_count={product.reviews_count}
               remaining_stock={product.remaining_stock || product.stock}
               department={product.department}
-              onAddToCart={onAddToCart}
+              onAddToCart={onAddToCart as any}
               onToggleWishlist={onToggleWishlist}
               isInWishlist={wishlistItems.includes(product.id)}
               model_3d={product.model_3d}

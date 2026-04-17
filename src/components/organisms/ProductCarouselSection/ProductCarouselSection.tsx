@@ -207,7 +207,7 @@ export function ProductCarouselSection({
                           reviews_count={product.reviews_count}
                           badge={product.discount && product.discount > 0 ? 'Sale' : undefined}
                           slug={product.slug}
-                          onAddToCart={onAddToCart}
+                          onAddToCart={onAddToCart as any}
                           onToggleWishlist={onToggleWishlist}
                           isInWishlist={wishlistItems.includes(product.id)}
                           discount={product.discount}
