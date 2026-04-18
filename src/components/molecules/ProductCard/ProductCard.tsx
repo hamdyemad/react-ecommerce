@@ -129,7 +129,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   return (
     <div
       className={cn(
-        'group relative rounded-[1.75rem] transition-all duration-500 transform',
+        'group relative rounded-[1.75rem] transition-all duration-500 transform flex flex-col h-full',
         'hover:scale-[1.02] hover:shadow-2xl',
         className
       )}
@@ -286,7 +286,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
       {/* Content Below Image */}
       <div 
-        className="p-5 sm:p-6 rounded-b-[1.65rem]"
+        className="p-5 sm:p-6 rounded-b-[1.65rem] flex flex-col flex-1"
         style={{
           background: mode === 'light' 
             ? 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)'
@@ -351,9 +351,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   <span
                     className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wide uppercase shadow-sm"
                     style={{
-                      background: mode === 'light' ? '#f5f3ff' : 'rgba(139, 92, 246, 0.1)',
-                      color: mode === 'light' ? '#7c3aed' : '#a78bfa',
-                      border: `1px solid ${mode === 'light' ? '#ddd6fe' : 'rgba(139, 92, 246, 0.2)'}`
+                      background: mode === 'light' ? '#f5f3ff' : 'rgba(167, 139, 250, 0.1)',
+                      color: mode === 'light' ? '#7c3aed' : '#c084fc',
+                      border: `1px solid ${mode === 'light' ? '#ddd6fe' : 'rgba(167, 139, 250, 0.2)'}`
                     }}
                   >
                     <span className="opacity-40 text-[8px] font-bold">{isRTL ? 'قسم:' : 'DEPT:'}</span>
@@ -368,7 +368,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wide uppercase shadow-sm"
                       style={{
                         background: mode === 'light' ? '#f0f9ff' : 'rgba(56, 189, 248, 0.1)',
-                        color: mode === 'light' ? '#0284c7' : '#38bdf8',
+                        color: mode === 'light' ? '#0284c7' : '#7dd3fc',
                         border: `1px solid ${mode === 'light' ? '#bae6fd' : 'rgba(56, 189, 248, 0.2)'}`
                       }}
                     >
@@ -384,9 +384,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                     <span
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wide uppercase shadow-sm"
                       style={{
-                        background: mode === 'light' ? '#f0fdf4' : 'rgba(34, 197, 94, 0.1)',
-                        color: mode === 'light' ? '#16a34a' : '#4ade80',
-                        border: `1px solid ${mode === 'light' ? '#bbf7d0' : 'rgba(34, 197, 94, 0.2)'}`
+                        background: mode === 'light' ? '#f0fdf4' : 'rgba(74, 222, 128, 0.1)',
+                        color: mode === 'light' ? '#16a34a' : '#86efac',
+                        border: `1px solid ${mode === 'light' ? '#bbf7d0' : 'rgba(74, 222, 128, 0.2)'}`
                       }}
                     >
                       <span className="opacity-40 text-[8px] font-bold">{isRTL ? 'فرعي:' : 'SUB:'}</span>
@@ -446,7 +446,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         )}
 
-        <div className="flex flex-wrap items-baseline gap-2 mb-2">
+        <div className="flex flex-wrap items-baseline gap-2 mb-2 mt-auto pt-2">
           <span 
             className="text-xl sm:text-2xl font-black"
             style={{ 

@@ -93,6 +93,16 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
   const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
   const [isZoomed, setIsZoomed] = useState(false);
 
+  // Auto-scroll thumbnail strip when selected image changes
+  useEffect(() => {
+    const strip = document.getElementById('thumbnail-strip');
+    const activeThumb = document.getElementById(`thumb-${selectedImage}`);
+    if (strip && activeThumb) {
+      const scrollLeft = activeThumb.offsetLeft - (strip.clientWidth / 2) + (activeThumb.clientWidth / 2);
+      strip.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+    }
+  }, [selectedImage]);
+
   // Review Form State
   const [reviewText, setReviewText] = useState('');
   const [reviewStar, setReviewStar] = useState(5);
@@ -534,20 +544,45 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
             </div>
 
             {images.length > 1 && (
-              <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
-                {images.map((img: string, idx: number) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedImage(idx)}
-                    className="flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border-2 transition-all p-2 bg-white"
-                    style={{
-                      borderColor: selectedImage === idx ? tokens.colors[mode].primary.DEFAULT : 'transparent',
-                      opacity: selectedImage === idx ? 1 : 0.6
-                    }}
-                  >
-                    <img src={img} alt="" className="w-full h-full object-contain" />
-                  </button>
-                ))}
+              <div className="relative group px-2 sm:px-0">
+                <button
+                  onClick={() => {
+                    const isRtl = document.dir === 'rtl';
+                    document.getElementById('thumbnail-strip')?.scrollBy({ left: isRtl ? 200 : -200, behavior: 'smooth' });
+                  }}
+                  className="absolute left-0 sm:-left-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white dark:bg-slate-800 border shadow-lg flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
+                  style={{ borderColor: tokens.colors[mode].border.DEFAULT, color: tokens.colors[mode].text.primary }}
+                >
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                </button>
+
+                <div id="thumbnail-strip" className="flex gap-4 overflow-x-auto pb-4 no-scrollbar scroll-smooth">
+                  {images.map((img: string, idx: number) => (
+                    <button
+                      key={idx}
+                      id={`thumb-${idx}`}
+                      onClick={() => setSelectedImage(idx)}
+                      className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 transition-all p-2 bg-white"
+                      style={{
+                        borderColor: selectedImage === idx ? tokens.colors[mode].primary.DEFAULT : 'transparent',
+                        opacity: selectedImage === idx ? 1 : 0.6
+                      }}
+                    >
+                      <img src={img} alt="" className="w-full h-full object-contain" />
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => {
+                    const isRtl = document.dir === 'rtl';
+                    document.getElementById('thumbnail-strip')?.scrollBy({ left: isRtl ? -200 : 200, behavior: 'smooth' });
+                  }}
+                  className="absolute right-0 sm:-right-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white dark:bg-slate-800 border shadow-lg flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
+                  style={{ borderColor: tokens.colors[mode].border.DEFAULT, color: tokens.colors[mode].text.primary }}
+                >
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </button>
               </div>
             )}
           </div>
@@ -557,24 +592,24 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
               <div className="flex flex-wrap items-center gap-3">
                 <Link 
                   to={`/department/${mainVendorProduct.department.slug}`}
-                  className="group flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-black bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest hover:bg-primary/10 hover:text-primary hover:scale-105 transition-all duration-300 border border-transparent hover:border-primary/20"
+                  className="group flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-black bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-100 uppercase tracking-widest hover:bg-primary/10 hover:text-primary hover:scale-105 transition-all duration-300 border border-transparent hover:border-primary/20"
                 >
-                  <span className="opacity-40">{t('common:department')}:</span>
+                  <span className="opacity-60">{t('common:department')}:</span>
                   <span className="flex items-center gap-1.5">🏢 {mainVendorProduct.department.name}</span>
                 </Link>
                 <Link 
                   to={`/category/${mainVendorProduct.category.slug}`}
-                  className="group flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-black bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest hover:bg-primary/10 hover:text-primary hover:scale-105 transition-all duration-300 border border-transparent hover:border-primary/20"
+                  className="group flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-black bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-100 uppercase tracking-widest hover:bg-primary/10 hover:text-primary hover:scale-105 transition-all duration-300 border border-transparent hover:border-primary/20"
                 >
-                  <span className="opacity-40">{t('common:category')}:</span>
+                  <span className="opacity-60">{t('common:category')}:</span>
                   <span className="flex items-center gap-1.5">🗂️ {mainVendorProduct.category.name}</span>
                 </Link>
                 {mainVendorProduct.sub_category && (
                   <Link 
                     to={`/sub-category/${mainVendorProduct.sub_category.slug}`}
-                    className="group flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-black bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase tracking-widest hover:bg-primary/10 hover:text-primary hover:scale-105 transition-all duration-300 border border-transparent hover:border-primary/20"
+                    className="group flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-black bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-100 uppercase tracking-widest hover:bg-primary/10 hover:text-primary hover:scale-105 transition-all duration-300 border border-transparent hover:border-primary/20"
                   >
-                    <span className="opacity-40">{t('common:subcategory')}:</span>
+                    <span className="opacity-60">{t('common:subcategory')}:</span>
                     <span className="flex items-center gap-1.5">🔖 {mainVendorProduct.sub_category.name}</span>
                   </Link>
                 )}
@@ -611,7 +646,7 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
               </div>
               
               <div className="flex items-center gap-3">
-                <p className="px-3 py-1 rounded-lg text-xs font-black bg-slate-100 dark:bg-slate-800 text-slate-500" style={{ fontFamily: 'monospace' }}>
+                <p className="px-3 py-1 rounded-lg text-xs font-black bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-100" style={{ fontFamily: 'monospace' }}>
                   SKU: {currentVariant?.sku || mainVendorProduct.sku}
                 </p>
               </div>
@@ -625,32 +660,32 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
               }}
             >
               <div className="relative z-10 flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+                  <span className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-wider sm:tracking-widest flex items-center gap-2">
                     {currentPrice ? t('common:priceForSelection') : t('common:startingFrom')}
                   </span>
                   
                   {currentStock > 0 ? (
-                    <span className="px-3 py-1 rounded-lg text-[10px] font-black bg-emerald-500/10 text-emerald-500 uppercase tracking-tighter flex items-center gap-1.5 border border-emerald-500/20">
+                    <span className="px-3 py-1 rounded-lg text-[9px] sm:text-[10px] font-black bg-emerald-500/10 text-emerald-500 uppercase tracking-normal sm:tracking-tighter flex items-center gap-1.5 border border-emerald-500/20">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       {currentStock} {t('common:unitsLeft', 'Units In Stock')}
                     </span>
                   ) : (
-                    <span className="px-3 py-1 rounded-lg text-[10px] font-black bg-rose-500/10 text-rose-500 uppercase tracking-tighter flex items-center gap-1.5 border border-rose-500/20">
+                    <span className="px-3 py-1 rounded-lg text-[9px] sm:text-[10px] font-black bg-rose-500/10 text-rose-500 uppercase tracking-normal sm:tracking-tighter flex items-center gap-1.5 border border-rose-500/20">
                       ❌ {t('common:outOfStock', 'Out of Stock')}
                     </span>
                   )}
                 </div>
 
                 <div className="space-y-4">
-                  <div className="flex flex-wrap items-baseline gap-2 sm:gap-4">
-                    <span className="text-3xl sm:text-5xl lg:text-6xl font-black text-primary drop-shadow-[0_0_15px_rgba(99,102,241,0.2)]">
+                  <div className="flex flex-wrap items-baseline gap-2 sm:gap-4 mt-1 sm:mt-0">
+                    <span className="text-2xl sm:text-4xl lg:text-6xl font-black text-primary drop-shadow-[0_0_15px_rgba(99,102,241,0.2)]">
                       <CurrencyDisplay amount={currentPrice || priceRange?.min || 0} size="lg" />
                     </span>
                     {(currentFake || (priceRange?.max && priceRange.max > priceRange.min)) && (
-                      <span className="text-xl font-bold text-slate-400 line-through opacity-60">
-                        <CurrencyDisplay amount={currentFake || priceRange?.max || 0} size="md" />
-                      </span>
+                      <s className="text-sm sm:text-xl font-bold text-slate-400 opacity-60 decoration-slate-400/60 decoration-2">
+                        <CurrencyDisplay amount={currentFake || priceRange?.max || 0} size="md" className="line-through" />
+                      </s>
                     )}
                   </div>
                 </div>
@@ -750,7 +785,7 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
                 <img src={mainVendorWrap.vendor.logo} alt="" className="max-w-full max-h-full object-contain" />
               </div>
               <div className="flex-1">
-                <p className="text-xs font-black text-slate-500 uppercase tracking-tighter mb-1">{t('authenticProductFrom', 'Authentic Product From')}</p>
+                <p className="text-xs font-black text-slate-600 dark:text-slate-400 uppercase tracking-tighter mb-1">{t('authenticProductFrom', 'Authentic Product From')}</p>
                 <div className="flex items-center justify-between">
                   <h4 className="font-black text-lg underline decoration-primary/30 underline-offset-4 group-hover/vendor:text-primary transition-colors">{mainVendorWrap.vendor.name}</h4>
                   <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-yellow-400/10 text-yellow-500">
@@ -833,7 +868,7 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
               </div>
 
               {quantity > 1 && (
-                <div className="px-2 flex items-center gap-2 text-slate-500 animate-fadeIn">
+                <div className="px-2 flex items-center gap-2 text-slate-600 dark:text-slate-400 animate-fadeIn">
                   <span className="text-xs font-black uppercase tracking-widest opacity-60">
                     {t('common:totalPrice', 'Selection Total')}:
                   </span>
@@ -850,15 +885,15 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
         </div>
 
         {tabs.length > 0 && (
-          <div className="mb-12 sm:mb-20">
-            <div className="flex gap-2 sm:gap-4 mb-6 sm:mb-10 border-b-2 border-slate-100 dark:border-slate-800/50 overflow-x-auto no-scrollbar pb-0">
+          <div className="mb-4 sm:mb-10">
+            <div className="flex gap-1 sm:gap-2 lg:gap-3 mb-6 sm:mb-10 border-b-2 border-slate-100 dark:border-slate-800/50 overflow-x-auto no-scrollbar pb-0">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-6 sm:px-10 py-4 sm:py-6 font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] transition-all relative whitespace-nowrap ${activeTab === tab.id ? 'text-primary opacity-100' : 'text-slate-400 opacity-60 hover:opacity-100'}`}
+                  className={`flex-none w-[30%] sm:flex-1 sm:w-auto px-1 sm:px-4 lg:px-5 py-3 sm:py-4 font-black text-[9px] sm:text-[10px] lg:text-[11px] uppercase tracking-wider transition-all relative whitespace-nowrap ${activeTab === tab.id ? 'text-primary opacity-100' : 'text-slate-400 opacity-60 hover:opacity-100'}`}
                 >
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center justify-center gap-1 sm:gap-2">
                     <span className="text-base sm:text-lg">{tab.icon}</span>
                     {t(`common:${tab.id}`)}
                   </span>
@@ -875,7 +910,7 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
             </div>
 
             <div 
-              className="p-8 sm:p-14 rounded-[35px] sm:rounded-[50px] border shadow-2xl relative overflow-hidden min-h-[300px] transition-all duration-500"
+              className="p-4 sm:p-10 rounded-[35px] sm:rounded-[50px] border shadow-2xl relative overflow-hidden min-h-[300px] transition-all duration-500"
               style={{
                 background: mode === 'light' 
                   ? 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.8) 100%)'
@@ -1089,9 +1124,9 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
                                 className="p-6 rounded-3xl border hover:shadow-lg transition-all"
                                 style={{ borderColor: tokens.colors[mode].border.DEFAULT, background: tokens.gradients.surface[mode] }}
                               >
-                                <div className="flex items-start gap-4">
+                                <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-6">
                                   {/* Customer Avatar */}
-                                  <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 border-2" style={{ borderColor: tokens.colors[mode].primary.DEFAULT + '40' }}>
+                                  <div className="w-16 h-16 sm:w-14 sm:h-14 rounded-full overflow-hidden flex-shrink-0 border-2" style={{ borderColor: tokens.colors[mode].primary.DEFAULT + '40' }}>
                                     {review.customer?.image ? (
                                       <img src={review.customer.image} alt={review.customer.full_name} className="w-full h-full object-cover" />
                                     ) : (
@@ -1101,24 +1136,25 @@ export function ProductDetailsPage({ onAddToCart, onToggleWishlist, wishlistItem
                                     )}
                                   </div>
 
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between mb-2">
-                                      <div>
-                                        <h5 className="font-black text-lg mb-1 truncate" style={{ color: tokens.colors[mode].text.primary }}>
+                                  <div className="flex-1 min-w-0 w-full">
+                                    <div className="flex flex-col sm:flex-row items-center sm:justify-between mb-4 sm:mb-2">
+                                      <div className="flex flex-col items-center sm:items-start">
+                                        <h5 className="font-black text-lg sm:text-xl mb-1 sm:mb-0 truncate w-full" style={{ color: tokens.colors[mode].text.primary }}>
                                           {review.customer?.full_name || 'Anonymous'}
                                         </h5>
-                                        <div className="flex items-center gap-2">
-                                          <div className="text-lg">
-                                            {'★'.repeat(review.star)}{'☆'.repeat(5 - review.star)}
+                                        <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 mt-1 sm:mt-1">
+                                          <div className="text-lg tracking-widest sm:tracking-normal text-yellow-400 drop-shadow-[0_0_2px_rgba(250,204,21,0.5)]">
+                                            {'★'.repeat(review.star)}
+                                            <span className="text-slate-300 dark:text-slate-600">{'☆'.repeat(5 - review.star)}</span>
                                           </div>
-                                          <span className="text-xs opacity-60" style={{ color: tokens.colors[mode].text.secondary }}>
+                                          <span className="text-[10px] sm:text-xs font-bold opacity-60 mt-1 sm:mt-0" style={{ color: tokens.colors[mode].text.secondary }}>
                                             {review.created_at}
                                           </span>
                                         </div>
                                       </div>
                                     </div>
 
-                                    <p className="font-medium leading-relaxed" style={{ color: tokens.colors[mode].text.secondary }}>
+                                    <p className="font-medium leading-relaxed text-sm sm:text-base mt-2 sm:mt-0" style={{ color: tokens.colors[mode].text.secondary }}>
                                       {review.review}
                                     </p>
                                   </div>

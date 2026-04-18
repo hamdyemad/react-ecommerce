@@ -8,8 +8,8 @@ const inputVariants = cva(
   {
     variants: {
       variant: {
-        default: 'border-border bg-white text-text-primary placeholder:text-text-tertiary',
-        filled: 'border-transparent bg-secondary-100 text-text-primary placeholder:text-text-tertiary',
+        default: 'border-border bg-white dark:bg-slate-800 text-text-primary dark:text-slate-100 placeholder:text-text-tertiary dark:placeholder:text-slate-500 dark:border-slate-700',
+        filled: 'border-transparent bg-secondary-100 dark:bg-slate-900 text-text-primary dark:text-slate-100 placeholder:text-text-tertiary dark:placeholder:text-slate-500',
       },
       inputSize: {
         sm: 'h-9 px-3 text-sm',

@@ -14,7 +14,7 @@ export function TermsPage() {
       <BreadCrumb 
         items={[
           { label: t('home'), path: '/' },
-          { label: t('termsSubtitle'), path: '/terms' }
+          { label: t('common:terms', 'Terms & Conditions'), path: '/terms' }
         ]}
       />
 
@@ -25,13 +25,13 @@ export function TermsPage() {
           className="text-5xl font-black mb-4"
           style={{ color: tokens.colors[mode].text.primary }}
         >
-          {settings?.terms_and_conditions?.title || t('termsSubtitle')}
+          {settings?.terms_and_conditions?.title || t('common:terms', 'Terms & Conditions')}
         </h1>
         <p 
           className="text-xl max-w-3xl mx-auto mb-4 font-bold leading-relaxed"
           style={{ color: tokens.colors[mode].text.secondary }}
         >
-          {t('termsSubtitle')}
+          {t('common:termsCarefully', 'Please read our terms and conditions carefully before using our services.')}
         </p>
       </div>
 

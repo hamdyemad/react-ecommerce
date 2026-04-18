@@ -55,6 +55,7 @@ export function Header({
   const [searchPage, setSearchPage] = useState(1);
   const [searchHasMore, setSearchHasMore] = useState(true);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const searchDropdownRef = useRef<HTMLDivElement>(null);
   const searchResultsContainerRef = useRef<HTMLDivElement>(null);
 
@@ -278,7 +279,7 @@ export function Header({
       </div>
 
       {/* Main Header */}
-      <div className={`max-w-7xl mx-auto transition-all duration-500 ${isScrolled ? 'px-4 sm:px-6 lg:px-12 py-1 sm:py-2' : 'px-4 sm:px-6 py-3 sm:py-5'}`}>
+      <div className={`max-w-7xl mx-auto transition-all duration-500 relative ${isScrolled ? 'px-4 sm:px-6 lg:px-12 py-1 sm:py-2' : 'px-4 sm:px-6 py-3 sm:py-5'}`}>
         <div className="flex items-center justify-between gap-2 sm:gap-8">
           <div className="flex items-center gap-3 sm:gap-6">
             <button
@@ -306,7 +307,10 @@ export function Header({
             </Link>
           </div>
 
-          <div className={`hidden lg:block transition-all duration-500 relative group ${isScrolled ? 'flex-1 max-w-lg' : 'flex-1 max-w-2xl'}`} ref={searchDropdownRef}>
+          <div 
+            className={`${showMobileSearch ? 'absolute top-full left-4 right-4 mt-2 z-50 block' : 'hidden'} lg:block lg:relative lg:mt-0 lg:left-auto lg:right-auto transition-all duration-500 group ${isScrolled ? 'lg:flex-1 lg:max-w-lg' : 'lg:flex-1 lg:max-w-2xl'}`} 
+            ref={searchDropdownRef}
+          >
             <input
               type="text"
               placeholder={t('common:searchProducts', 'Search products...')}
@@ -320,19 +324,22 @@ export function Header({
                   navigate(`/products?search=${headerSearchTerm}`);
                   setHeaderSearchTerm('');
                   setShowSearchDropdown(false);
+                  setShowMobileSearch(false);
                 }
               }}
               style={{
                 backgroundColor: tokens.colors[mode].surface.elevated,
-                color: tokens.colors[mode].text.primary
+                color: tokens.colors[mode].text.primary,
+                boxShadow: showMobileSearch ? (mode === 'light' ? '0 10px 25px rgba(0,0,0,0.1)' : '0 10px 25px rgba(0,0,0,0.5)') : 'none'
               }}
-              className="w-full px-8 py-4 pr-14 rounded-[20px] focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500 border-none"
+              className="w-full px-8 py-4 pr-14 rounded-[20px] focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500 border border-slate-200 dark:border-slate-700 lg:border-none"
             />
             <button 
               onClick={() => {
                 navigate(`/products?search=${headerSearchTerm}`);
                 setHeaderSearchTerm('');
                 setShowSearchDropdown(false);
+                setShowMobileSearch(false);
               }}
               className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors cursor-pointer hover:scale-110 active:scale-90"
             >
@@ -375,6 +382,7 @@ export function Header({
                           onClick={() => {
                             setHeaderSearchTerm('');
                             setShowSearchDropdown(false);
+                            setShowMobileSearch(false);
                           }}
                           className="flex items-center gap-4 p-3 rounded-2xl transition-all hover:bg-primary/5 group"
                         >
@@ -464,6 +472,7 @@ export function Header({
                           navigate(`/products?search=${headerSearchTerm}`);
                           setHeaderSearchTerm('');
                           setShowSearchDropdown(false);
+                          setShowMobileSearch(false);
                         }}
                         className="w-full py-2.5 rounded-xl bg-primary text-white text-xs font-black uppercase tracking-widest hover:scale-[1.02] transition-all active:scale-[0.98]"
                       >
@@ -476,6 +485,22 @@ export function Header({
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">
+            {/* Mobile Search Button */}
+            <button 
+              className={`lg:hidden relative p-2 sm:p-3 rounded-2xl transition-all group ${
+                mode === 'light' ? 'hover:bg-slate-100' : 'hover:bg-slate-800'
+              }`}
+              onClick={() => setShowMobileSearch(!showMobileSearch)}
+            >
+              <svg className="w-6 h-6" style={{ color: tokens.colors[mode].text.primary }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {showMobileSearch ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                )}
+              </svg>
+            </button>
+
             <Link 
               to="/wishlist" 
               className={`relative p-2 sm:p-3 rounded-2xl transition-all group ${

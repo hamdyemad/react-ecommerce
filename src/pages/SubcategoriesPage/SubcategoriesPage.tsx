@@ -20,7 +20,7 @@ export function SubcategoriesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
-  const itemsPerSlide = isMobile ? 4 : 8;
+  const itemsPerSlide = isMobile ? 1 : 8;
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
@@ -153,7 +153,7 @@ export function SubcategoriesPage() {
           <Carousel 
             autoPlay={false} 
             showDots={true} 
-            peekAmount={0} 
+            peekAmount={isMobile ? 10 : 0} 
             variant="standalone"
             onEndReached={handleEndReached}
           >
@@ -163,7 +163,7 @@ export function SubcategoriesPage() {
                 slides.push(subcategories.slice(i, i + itemsPerSlide));
               }
               return slides.map((slideSubs, idx) => (
-                <div key={idx} className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 px-4 sm:px-10 py-4 sm:py-8">
+                <div key={idx} className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-8 px-4 sm:px-10 py-4 sm:py-8">
                   {slideSubs.map((sub) => (
                     <Link 
                       key={sub.id}

@@ -22,6 +22,7 @@ export function NewArrivalsPage({ onAddToCart, onToggleWishlist, wishlistItems }
         onAddToCart={onAddToCart}
         onToggleWishlist={onToggleWishlist}
         wishlistItems={wishlistItems}
+        hideAddToCart={true}
       />
     </div>
   );

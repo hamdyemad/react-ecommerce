@@ -19,11 +19,16 @@ export function BrandsPage() {
   const [hasMore, setHasMore] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   
-  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1024 : false);
-  const itemsPerSlide = isMobile ? 4 : 8;
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 768) setScreenSize('mobile');
+      else if (width < 1024) setScreenSize('tablet');
+      else setScreenSize('desktop');
+    };
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -78,7 +83,7 @@ export function BrandsPage() {
   };
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6 max-w-[1440px] mx-auto">
+    <div className="py-8 px-4 sm:px-6 max-w-[1440px] mx-auto">
       <SEO title={t('common:brands', 'Brands')} />
       <BreadCrumb 
         items={[
@@ -149,21 +154,23 @@ export function BrandsPage() {
           </button>
         </div>
       ) : (
-        <div className="mb-2 relative">
+        <div className="relative">
           <Carousel 
             autoPlay={false} 
             showDots={true} 
-            peekAmount={0} 
+            peekAmount={10} 
             variant="standalone"
             onEndReached={handleEndReached}
           >
             {(() => {
+              const itemsPerSlide = screenSize === 'mobile' ? 1 : screenSize === 'tablet' ? 2 : 4;
+              const gridColsClass = screenSize === 'mobile' ? 'grid-cols-1' : screenSize === 'tablet' ? 'grid-cols-2' : 'grid-cols-4';
               const slides = [];
               for (let i = 0; i < brands.length; i += itemsPerSlide) {
                 slides.push(brands.slice(i, i + itemsPerSlide));
               }
               return slides.map((slideBrands, idx) => (
-                <div key={idx} className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8 px-4 sm:px-10 py-4 sm:py-8">
+                <div key={idx} className={`grid ${gridColsClass} gap-4 sm:gap-8 px-2 sm:px-4 py-2 sm:py-6`}>
                   {slideBrands.map((brand) => (
                     <Link 
                       key={brand.id}
@@ -171,38 +178,44 @@ export function BrandsPage() {
                       className="group block h-full"
                     >
                       <div 
-                        className="rounded-[40px] sm:rounded-[60px] p-8 sm:p-12 h-full transition-all duration-700 hover:scale-[1.05] hover:shadow-[0_30px_70px_rgba(0,0,0,0.12)] border flex flex-col items-center justify-center text-center gap-6 sm:gap-10 hover:border-primary/20"
+                        className="rounded-[32px] sm:rounded-[40px] p-6 sm:p-8 h-full transition-all duration-500 hover:scale-105 hover:shadow-2xl border flex flex-col items-center text-center gap-4 sm:gap-6 group-hover:border-primary/30"
                         style={{
-                          background: mode === 'light' ? tokens.colors.light.surface.base : tokens.colors.dark.surface.base,
-                          borderColor: mode === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)',
-                          boxShadow: mode === 'light' ? '0 15px 45px rgba(0,0,0,0.03)' : '0 15px 45px rgba(0,0,0,0.25)'
+                          background: mode === 'light' 
+                            ? 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' 
+                            : 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+                          borderColor: mode === 'light' ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)',
+                          boxShadow: mode === 'light' 
+                            ? '0 10px 30px -5px rgba(0, 0, 0, 0.05)' 
+                            : '0 20px 40px -10px rgba(0, 0, 0, 0.4)',
                         }}
                       >
-                        {/* Logo Container with Shadow */}
+                        {/* Logo Container */}
                         <div 
-                          className="w-24 h-24 sm:w-36 sm:h-36 rounded-full bg-white flex items-center justify-center p-6 sm:p-8 transition-all duration-700 group-hover:scale-110 shadow-xl group-hover:shadow-primary/30 relative overflow-hidden"
+                          className="w-20 h-20 sm:w-24 sm:h-24 rounded-[24px] sm:rounded-[30px] flex items-center justify-center p-4 sm:p-6 group-hover:bg-primary/10 transition-all duration-500 group-hover:-rotate-12 group-hover:scale-110 relative overflow-hidden"
+                          style={{
+                            background: mode === 'light' ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.02)',
+                            boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.02)'
+                          }}
                         >
+                          <div className="absolute inset-0 bg-primary/5 rounded-[24px] sm:rounded-[30px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                           <img 
                             src={brand.logo} 
                             alt={brand.name} 
-                            className="w-full h-full object-contain filter group-hover:drop-shadow-lg transition-all duration-700" 
+                            className="w-full h-full object-contain filter transition-all duration-500 relative z-10" 
                           />
                         </div>
 
-                        <div className="w-full">
+                        <div className="w-full flex flex-col items-center">
                           <h3 
-                            className="text-xl sm:text-3xl font-black mb-3 sm:mb-5 group-hover:text-primary transition-colors duration-500 px-2 line-clamp-2"
+                            className="text-lg sm:text-xl font-black mb-2 truncate w-full max-w-[200px]"
                             style={{ color: tokens.colors[mode].text.primary }}
                           >
                             {brand.name}
                           </h3>
-                          <div className="flex flex-col items-center gap-2">
-                             <div className="flex gap-2">
-                                <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-wider">
-                                  {brand.products_count} {t('common:products', 'Products')}
-                                </span>
-                             </div>
-                             <span className="text-xs font-bold opacity-40 uppercase tracking-widest">{t('common:officialStore', 'Official Store')}</span>
+                          <div className="flex flex-col items-center gap-1.5 sm:gap-2 w-full">
+                             <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-[10px] sm:text-[12px] font-black uppercase tracking-widest transition-colors duration-300 group-hover:bg-primary group-hover:text-white">
+                               {brand.products_count} {t('common:products', 'Products')}
+                             </span>
                           </div>
                         </div>
                       </div>

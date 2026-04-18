@@ -180,7 +180,7 @@ export function ContactPage() {
                 <div>
                   <label 
                     className="block text-sm font-black uppercase tracking-widest mb-2 px-1"
-                    style={{ color: tokens.colors[mode].text.tertiary }}
+                    style={{ color: tokens.colors[mode].text.secondary }}
                   >
                     {t('fullName')} *
                   </label>
@@ -189,7 +189,7 @@ export function ContactPage() {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    placeholder="John Doe"
+                    className="font-bold"
                     required
                   />
                 </div>
@@ -197,7 +197,7 @@ export function ContactPage() {
                 <div>
                   <label 
                     className="block text-sm font-black uppercase tracking-widest mb-2 px-1"
-                    style={{ color: tokens.colors[mode].text.tertiary }}
+                    style={{ color: tokens.colors[mode].text.secondary }}
                   >
                     {t('emailAddress')} *
                   </label>
@@ -206,6 +206,7 @@ export function ContactPage() {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
+                    className="font-bold"
                     placeholder="john@example.com"
                     required
                   />
@@ -216,7 +217,7 @@ export function ContactPage() {
                 <div>
                   <label 
                     className="block text-sm font-black uppercase tracking-widest mb-2 px-1"
-                    style={{ color: tokens.colors[mode].text.tertiary }}
+                    style={{ color: tokens.colors[mode].text.secondary }}
                   >
                     {t('phoneNumber')}
                   </label>
@@ -225,6 +226,7 @@ export function ContactPage() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
+                    className="font-bold"
                     placeholder="+1 (555) 123-4567"
                   />
                 </div>
@@ -232,7 +234,7 @@ export function ContactPage() {
                 <div>
                   <label 
                     className="block text-sm font-black uppercase tracking-widest mb-2 px-1"
-                    style={{ color: tokens.colors[mode].text.tertiary }}
+                    style={{ color: tokens.colors[mode].text.secondary }}
                   >
                     {t('subject')} *
                   </label>
@@ -241,6 +243,7 @@ export function ContactPage() {
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
+                    className="font-bold"
                     placeholder="How can we help you?"
                     required
                   />
@@ -263,7 +266,7 @@ export function ContactPage() {
                 required
                 className="w-full px-6 py-4 rounded-2xl border focus:outline-none focus:ring-4 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-bold"
                 style={{
-                  backgroundColor: mode === 'light' ? tokens.colors.light.surface.base : tokens.colors.dark.surface.base,
+                  backgroundColor: mode === 'light' ? tokens.colors.light.surface.base : '#1e293b',
                   borderColor: tokens.colors[mode].border.DEFAULT,
                   color: tokens.colors[mode].text.primary
                 }}

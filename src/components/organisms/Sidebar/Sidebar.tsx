@@ -35,7 +35,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         { label: t('subCategories', 'Sub Categories'), path: '/sub-categories', icon: '📁' },
         { label: t('common:brands'), path: '/brands', icon: '🏷️' },
         { label: t('hotDeals'), path: '/deals', icon: '💰' },
-        { label: t('newArrivalsTitle', 'New Arrivals'), path: '/new-arrivals', icon: '🆕' },
+        { label: t('newArrivalsTitle', 'New Arrivals'), path: '/new-arrivals' },
         { label: t('bestSellers', 'Best Sellers'), path: '/products', icon: '⭐' },
       ]
     },
@@ -62,7 +62,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         { label: t('aboutUs'), path: '/about-us', icon: '🏢' },
         { label: t('blog'), path: '/blogs', icon: '📝' },
         { label: t('returnPolicy'), path: '/return-policy', icon: '↩️' },
-        { label: t('termsSubtitle'), path: '/terms', icon: '📋' },
+        { label: t('common:terms', 'Terms & Conditions'), path: '/terms', icon: '📋' },
         { label: t('contactUs'), path: '/contact', icon: '📞' },
         { label: t('common:storeLocator', 'Store Locator'), path: '/store-locator', icon: '📍' },
       ]
@@ -189,7 +189,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                       }}
                     >
                       <span className="text-xl transition-transform group-hover:scale-125">{link.icon}</span>
-                      <span className="font-bold">{link.label}</span>
+                      <span className="font-bold text-sm">{link.label}</span>
                     </Link>
                   ))}
                 </div>

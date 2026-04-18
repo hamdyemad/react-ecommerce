@@ -123,6 +123,7 @@ export function DealsPage({ onAddToCart, onToggleWishlist, wishlistItems = [] }:
           onAddToCart={onAddToCart}
           onToggleWishlist={onToggleWishlist || (() => {})}
           wishlistItems={wishlistItems}
+          hideAddToCart={true}
         />
       </div>
     </div>
